@@ -1,0 +1,18 @@
+# autoreconf -fvi
+autom4te.cache
+config.h.in~
+Makefile.in
+aclocal.m4
+ar-lib
+compile
+configure
+depcomp
+fig2dev/Makefile.in
+fig2dev/bitmaps/Makefile.in
+fig2dev/dev/Makefile.in
+fig2dev/i18n/Makefile.in
+fig2dev/tests/Makefile.in
+install-sh
+man/Makefile.in
+missing
+transfig/Makefile.in
