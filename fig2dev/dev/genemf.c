@@ -1,23 +1,26 @@
 /*
- * TransFig: Facility for Translating Fig code
- * Copyright (c) 1999 by Philippe Bekaert
- * Parts Copyright (c) 1989-2002 by Brian V. Smith
+ * Fig2dev: Translate Fig code to various Devices
+ * Copyright (c) 1991 by Micah Beck
+ * Parts Copyright (c) 1985-1988 by Supoj Sutanthavibul
+ * Parts Copyright (c) 1989-2015 by Brian V. Smith
+ * Parts Copyright (c) 2015-2019 by Thomas Loimer
  *
  * Any party obtaining a copy of these files is granted, free of charge, a
  * full and unrestricted irrevocable, world-wide, paid up, royalty-free,
- * nonexclusive right and license to deal in this software and
- * documentation files (the "Software"), including without limitation the
- * rights to use, copy, modify, merge, publish and/or distribute copies of
- * the Software, and to permit persons who receive copies from any such
- * party to do so, with the only requirement being that this copyright
- * notice remain intact.
+ * nonexclusive right and license to deal in this software and documentation
+ * files (the "Software"), including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense and/or sell copies
+ * of the Software, and to permit persons who receive copies from any such
+ * party to do so, with the only requirement being that the above copyright
+ * and this permission notice remain intact.
  *
  */
 
 /*
- * genemf.c -- convert fig to Enhanced MetaFile
+ * genemf.c: convert fig to Enhanced MetaFile
  *
  * Written by Michael Schrick (2001-03-04)
+ * Adapted from gencgm.c
  *
  * Changes:
  *
@@ -69,19 +72,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
+#ifdef	HAVE_STRINGS_H
+#include <strings.h>		/* isascii() */
+#endif
+#include <ctype.h>
 #include <math.h>
 #include <limits.h>
-#include "bool.h"
 #include "pi.h"
 #if defined(I18N) && defined(HAVE_ICONV)
 #include <iconv.h>
 #endif
 
-#include "fig2dev.h"
+#include "fig2dev.h"	/* includes "bool.h" */
 #include "object.h"	/* does #include <X11/xpm.h> */
+#include "readpics.h"
 #include "genemf.h"
-#include "pathmax.h"
 
 #define UNDEFVALUE	-100	/* UNDEFined attribute value */
 #define EPSILON		1e-4	/* small floating point value */
@@ -580,7 +585,6 @@ static uchar	lfPitchAndFamily[] = {
 		};
 
 #if defined(I18N) && defined(HAVE_ICONV)
-extern bool support_i18n;  /* enable i18n support? */
 
 #define FONT_TIMES_ROMAN	0
 #define FONT_TIMES_BOLD		2
@@ -703,10 +707,8 @@ static void textalign();
 static void moveto();
 #endif
 
-extern FILE *open_picfile(char *name, int *type, bool pipeok, char *retname);
-extern void close_picfile(FILE *file, int type);
 #ifdef HAVE_PNG_H
-extern	int read_png();
+extern int  read_png(FILE *file, int filetype, F_pic *pic, int *llx, int *lly);
 #endif
 
 /* Piece of code to avoid unnecessary attribute changes */
@@ -2392,11 +2394,10 @@ picbox(F_line *l)
 {
     EMRSTRETCHDIBITS em_sd;
     BITMAPINFO bmi;
-    char buf[512], realname[PATH_MAX];
+    char buf[16], *realname;
     int filtype;
     int dx, dy;
     FILE *picf;
-    int pllx, plly;
     int img_w, img_h;
     int rotation;
     size_t bsize, coltabsize;
@@ -2418,7 +2419,9 @@ picbox(F_line *l)
     else if (dy < 0 && dx >= 0)
        rotation = 90;
 
-    if ((picf = open_picfile(l->pic->file, &filtype, true, realname)) == NULL) {
+    picf = open_picfile(l->pic->file, &filtype, true, &realname);
+    free(realname);	/* not used */
+    if (picf == NULL) {
 	fprintf(stderr, "fig2dev: %s: No such picture file\n", l->pic->file);
 	return;
     }
@@ -2438,7 +2441,10 @@ picbox(F_line *l)
 #ifdef HAVE_PNG_H
     if (strncmp(buf, "\211\120\116\107\015\012\032\012", (size_t) 8) == 0) {
 	/* png file */
-	if ((picf = open_picfile(l->pic->file, &filtype, true, realname)) == NULL) {
+	int pllx, plly;
+	picf = open_picfile(l->pic->file, &filtype, true, &realname);
+	free(realname);		/* not used */
+	if (picf == NULL) {
 	    perror(l->pic->file);
 	    return;
 	}
@@ -2992,7 +2998,7 @@ textunicode(
     } else {
 	*n_chars = srccnt;
 	*n_unicode = srccnt * 2;
-	for (i = 0; i < srccnt; i++) {
+	for (i = 0; i < (int) srccnt; ++i) {
 	    if (str[i] == '\n')
 		(*utext)[i] = 0;
 	    else
@@ -3008,7 +3014,7 @@ textunicode(
 	*utext = (short *)calloc((size_t) *n_unicode + 4 /* null + align */,
 	    (size_t) 1);
     }
-    for (i = 0; i < *n_chars; i++) {		/* Convert to unicode. */
+    for (i = 0; i < *n_chars; ++i) {		/* Convert to unicode. */
 	if (str[i] == '\n') {
 	    (*utext)[i] = 0;
 	} else {
@@ -3162,6 +3168,8 @@ genemf_option(char opt, char *optarg)
 void
 genemf_start(F_compound *objects)
 {
+    (void)	objects;
+
     EMRSETMAPMODE em_sm;
     short *uni_description = NULL;	/* Unitext description. */
     int n_chars, n_unicode;
@@ -3405,6 +3413,7 @@ genemf_spline(F_spline *s)
 {
     static int wgiv = 0;
 
+    print_comments("% ", s->comments, "");
     if (!wgiv) {
 	fprintf(stderr, "\
 Warning: the EMF driver doesn't support (old style) FIG splines.\n\
@@ -3462,11 +3471,16 @@ genemf_text(F_text *t)
     if (figLanguage != LANG_DEFAULT && IS_LOCALE_FONT(font)) {
 	/* prescan text to decide if font switching is needed */
 	nascii = neuc = 0;
-	for (s = (void *) t->cstring; *s; s++) {
-	    if (*s > 127)
-		neuc++;
+	for (s = t->cstring; *s; ++s) {
+	    /*
+	     * isascii(int) is defined on all integer values, man isascii(3p)
+	     * a cast to unsigned char is not necessary, as for the other
+	     * is* character class functions (e.g., man isalpha(3p) or (3))
+	     */
+	    if (isascii(*s))
+		++nascii;
 	    else
-		nascii++;
+		++neuc;
 	}
 
 	if (neuc == 0)
@@ -3489,7 +3503,7 @@ genemf_text(F_text *t)
 	    /* move to the first (left) position */
 	    moveto(x, y);
 
-	    for (s = (void *) t->cstring; *s; s = s1) {
+	    for (s = t->cstring; *s; s = s1) {
 		if (*s & 0x80) {
 		    /* EUC 2byte char */
 		    for (s1 = s; *s1 & 0x80; s1 += 2)
@@ -3590,7 +3604,7 @@ fig2dev: error: fseek() failed.  EMF language requires the output is seekable.\
 struct driver dev_emf = {
 	genemf_option,
 	genemf_start,
-	gendev_nogrid,		/* TODO - Create genemf_grid for 3.2.4 */
+	gendev_nogrid,		/* TODO - Create genemf_grid */
 	genemf_arc,
 	genemf_ellipse,
 	genemf_line,

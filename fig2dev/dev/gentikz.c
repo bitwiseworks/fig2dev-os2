@@ -1,23 +1,25 @@
 /*
- * TransFig: Facility for Translating Fig code
+ * Fig2dev: Translate Fig code to various Devices
  * Copyright (c) 1991 by Micah Beck
  * Parts Copyright (c) 1985-1988 by Supoj Sutanthavibul
- * Parts Copyright (c) 1989-2002 by Brian V. Smith
+ * Parts Copyright (c) 1989-2015 by Brian V. Smith
+ * Parts Copyright (c) 2015-2019 by Thomas Loimer
  *
  * Any party obtaining a copy of these files is granted, free of charge, a
  * full and unrestricted irrevocable, world-wide, paid up, royalty-free,
- * nonexclusive right and license to deal in this software and
- * documentation files (the "Software"), including without limitation the
- * rights to use, copy, modify, merge, publish and/or distribute copies of
- * the Software, and to permit persons who receive copies from any such
- * party to do so, with the only requirement being that this copyright
- * notice remain intact.
+ * nonexclusive right and license to deal in this software and documentation
+ * files (the "Software"), including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense and/or sell copies
+ * of the Software, and to permit persons who receive copies from any such
+ * party to do so, with the only requirement being that the above copyright
+ * and this permission notice remain intact.
  *
  */
 
 /*
- * gentikz.c: TeX/LaTeX tikz driver for fig2dev
- * Copyright (c) 2015, 2016 by Thomas Loimer
+ * gentikz.c: convert fig to tikz macro language for TeX/LaTeX
+ *
+ * Author: Thomas Loimer
  *
  * BUGS:	o shades or tints of the default color may be incorrect
  *		o arrows on arcs and on very short lines may be different
@@ -32,14 +34,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "bool.h"
 #include "pi.h"
 
-#include "fig2dev.h"
+#include "fig2dev.h"	/* includes "bool.h" */
 #include "object.h"	/* does #include <X11/xpm.h> */
 #include "texfonts.h"		/* texfontnames[] */
 #include "bound.h"
 #include "gentikz.h"
+#include "psfonts.h"
 
 /* String arrays and structs */
 extern char	*ISO1toTeX[];	/* iso2tex.c */
@@ -248,11 +250,14 @@ static bool	removesuffix = false;
 static bool	usetexfonts = false;
 static bool	allspecial = false;
 static bool	pagemode = false;
+static bool	figscaling = true;
 static char	*prepend = NULL;
+static int	xshift = 0;		/* translate figure, if necessary */
+static int	yshift = 0;		/* translate figure, if necessary */
 static int	encoding = 1;
 static int	verbose = 0;
 static double	unitlength;
-static int	default_color = BLACK_COLOR;
+static int	default_color = DEFAULT;
 /* static int	cur_color = DEFAULT; */
 static int	cur_pencolor = DEFAULT;
 static int	cur_patcolor = DEFAULT;
@@ -265,13 +270,8 @@ static struct options	alt_options;
 /* Macros */
 #define	PREC1(f)	floor(f) == f ? 0 : 1
 #define	MINLINELENGTH	75
-/* coordinates relative to the lower left corner of the bounding box */
-/* #define XCOORD(x)	((x) - llx) */
-/* #define YCOORD(y)	(ury - (y)) */
-/* coordinates relative to the origin on the xfig canvas, which is top left */
-/* The origin must be kept if a grid should be drawn */
-#define XCOORD(x)	(x)
-#define YCOORD(y)	(-(y))
+#define XCOORD(x)	(x + xshift)
+#define YCOORD(y)	(-y + yshift)
 #define XDIR(x)		x
 #define YDIR(y)		-(y)
 #define THICKNESS(T)	(T <= THICK_SCALE ? 0.5*T : T - THICK_SCALE)
@@ -287,6 +287,7 @@ static struct options	alt_options;
 #define	HAS_JOINS	2
 
 #define	DEG_RAD		57.295779513082322865	/* = 180. / M_PI */
+
 
 void
 gentikz_option(char opt, char *optarg)
@@ -347,6 +348,10 @@ gentikz_option(char opt, char *optarg)
 
 	case 'v':
 	    verbose = 1;		/* verbose mode */
+	    break;
+
+	case 'W':
+	    figscaling = false;
 	    break;
 
 	case 'w':		/* remove suffix from included graphics file */
@@ -658,6 +663,31 @@ define_arrow(int ttype, int indx)
 	fputs("  }\n}\n", tfp);
 }
 
+/*
+ * TeX cannot handle numbers larger than 16383. However, coordinate numbers
+ * larger than 16383 are ok, while numbers smaller than -16383 yield a
+ * "dimension too large" error. Presumably, positive numbers are handled
+ * directly by tikz, while negative numbers involve a pass to TeX. Hence,
+ * shift the figure such that all coordinates are larger than -16383.
+ */
+
+/* Compute a shift to translate coordinates to values larger than -16383 */
+int
+shift_coordinate(int ll)
+{
+	const int	ippi = (int)ppi;
+	const int	min_number = -16383;
+	int		shift;
+
+	if (ll >= min_number) {
+		shift = 0;
+	} else {
+		shift = min_number - ll;
+		shift = ((shift / ippi) + 1) * ippi;
+	}
+	return shift;
+}
+
 void
 gentikz_start(F_compound *objects)
 {
@@ -677,10 +707,13 @@ gentikz_start(F_compound *objects)
 	urx += border_margin;
 	ury += border_margin;
 
+	xshift = shift_coordinate(llx);
+	yshift = shift_coordinate(-ury);
+
 	/* print any whole-figure comments prefixed with "%" */
 	if (objects->comments) {
 	    fprintf(tfp,"%%\n");
-	    print_comments("% ",objects->comments, "");
+	    print_comments("% ", objects->comments, "");
 	    fprintf(tfp,"%%\n");
 	}
 	if (pagemode) {
@@ -706,12 +739,16 @@ gentikz_start(F_compound *objects)
 	    if (pats_used)
 		fputs("\\usetikzlibrary{patterns}\n", tfp);
 	    fputs("\\parindent0pt\n\\begin{document}\n", tfp);
+	}
+	if (!pagemode)
+		fputs("{\\pgfkeys{/pgf/fpu/.try=false}%\n", tfp);
+	if (pagemode || !figscaling) {
 /*	if (metric)	fprintf(tfp, "%% 4143.7 sp = (1/472.44) cm\n");
  *	else		fprintf(tfp, "%% 3946.9 sp = (1/1200) in\n");	*/
 	    fprintf(tfp, "\\tikzpicture[x=+%lisp, y=+%lisp]\n",
 		    (long) splength,	/* intentionally do not round	*/
 		    (long) splength);	/* like (splength + 0.5)	*/
-	    fprintf(tfp, "\\newdimen\\XFigu\\XFigu%lisp\n", (long) splength);
+	    fprintf(tfp, "\\newdimen\\XFigu\\XFigu%lisp\n", (long)splength);
 	} else {
 	    fputs("\\ifx\\XFigwidth\\undefined\\dimen1=0pt", tfp);
 	    fputs("\\else\\dimen1\\XFigwidth\\fi\n", tfp);
@@ -720,18 +757,27 @@ gentikz_start(F_compound *objects)
 	    fputs("\\else\\dimen3\\XFigheight\\fi\n", tfp);
 	    fprintf(tfp, "\\divide\\dimen3 by %d\n", ury-lly);
 	    fputs("\\ifdim\\dimen1=0pt\\ifdim\\dimen3=0pt", tfp);
-	    fprintf(tfp, "\\dimen1=%lisp\\dimen3\\dimen1\n", (long) splength);
+	    fprintf(tfp, "\\dimen1=%lisp\\dimen3\\dimen1\n", (long)splength);
 	    fputs("  \\else\\dimen1\\dimen3\\fi", tfp);
 	    fputs("\\else\\ifdim\\dimen3=0pt\\dimen3\\dimen1\\fi\\fi\n", tfp);
 	    fputs("\\tikzpicture[x=+\\dimen1, y=+\\dimen3]\n", tfp);
+	}
+	if (pagemode) {
+	    fprintf(tfp, "\\newdimen\\XFigu\\XFigu%lisp\n", (long)splength);
+	} else {
 	    fputs("{\\ifx\\XFigu\\undefined\\catcode`\\@11\n", tfp);
+		/* \newdimen can only be used in \outer mode */
+		/* define \temp like \newdimen in plain.tex, without \outer */
 	    fputs("\\def\\temp{\\alloc@1\\dimen\\dimendef\\insc@unt}", tfp);
 	    fputs("\\temp\\XFigu\\catcode`\\@12\\fi}\n", tfp);
 	    fprintf(tfp, "\\XFigu%lisp\n", (long) splength);
-	    fputs("% Uncomment to scale line thicknesses with the same\n", tfp);
-	    fputs("% factor as width of the drawing.\n", tfp);
-	    fputs("%\\pgfextractx\\XFigu{\\pgfqpointxy{1}{1}}\n", tfp);
-	    fputs("\\ifdim\\XFigu<0pt\\XFigu-\\XFigu\\fi\n", tfp);
+	    if (figscaling) {
+	        fputs("% Uncomment to scale line thicknesses with the same\n",
+				tfp);
+	        fputs("% factor as width of the drawing.\n", tfp);
+	        fputs("%\\pgfextractx\\XFigu{\\pgfqpointxy{1}{1}}\n", tfp);
+	        fputs("\\ifdim\\XFigu<0pt\\XFigu-\\XFigu\\fi\n", tfp);
+	    }
 	}
 
 	if (pats_used) {
@@ -822,9 +868,11 @@ gentikz_grid(float major, float minor)
 int
 gentikz_end()
 {
-	fprintf(tfp, "\\endtikzpicture%%\n");
+	fputs("\\endtikzpicture", tfp);
 	if (pagemode)
-	    fprintf(tfp, "\\end{document}");
+	    fputs("%\n\\end{document}", tfp);
+	else
+	    fputs("}%\n", tfp);
 
 	return 0;
 }
@@ -872,15 +920,13 @@ put_picture(F_point *p, F_point *r, F_pic *pic)
 	 *					       |      |
 	 *					     2 +------+ 3
 	 */
-	int	n, dx, dy, rot;
+	int	n, dx, dy, rot = 0;
 	char	*c;
 
 	dx = r->x - p->x;
 	dy = r->y - p->y;
 	/* get the rotation, and write the height and width to dx and dy */
-	if (dx >= 0 && dy >= 0) {   /* >= 0 - to silence static analyzer warnings */
-	    rot = 0;
-	} else if (dx < 0 && dy < 0) {
+	if (dx < 0 && dy < 0) {
 	    dx = -dx;
 	    dy = -dy;
 	    rot = 180;
@@ -894,7 +940,7 @@ put_picture(F_point *p, F_point *r, F_pic *pic)
 	    dx = -dy;
 	    dy = rot;
 	    rot = 90;
-	}
+	} /* else dx >= 0 && dy >= 0: rot = 0 */
 
 	if (pic->flipped) {
 	    rot += 90;
@@ -907,7 +953,7 @@ put_picture(F_point *p, F_point *r, F_pic *pic)
 
 	if (removesuffix) {
 	    c = strrchr(pic->file,'.');
-	    n =  c == NULL ? strlen(pic->file) : c - pic->file;
+	    n =  c == NULL ? (int)strlen(pic->file) : c - pic->file;
 	} else {
 	    n = strlen(pic->file);
 	}
@@ -1307,7 +1353,7 @@ create_arrow(F_arrow *a, struct options *o)
 
 	t.type = arrowtype(a->type, a->style);
 	t.props = pgfarrow[t.type].props;
-	if (a->style && t.props & HAS_FILL + HAS_SWAP)
+	if (a->style && t.props & (HAS_FILL + HAS_SWAP))
 	    t.flags = STYLE_MEANS_SWAP(t.type) ? HAS_SWAP : HAS_FILL;
 	else
 	    t.flags = 0;
@@ -1465,7 +1511,8 @@ assign_arrow(struct tikzarrow *a, struct tikzarrow *o)
 static void
 set_arrows(F_arrow *back, F_arrow *forw)
 {
-	static struct tikzarrow	    cur_b = {NOARROW}, cur_f = {NOARROW};
+	static struct tikzarrow      cur_b = {NOARROW,0,0,{0,0.0,0.0,0.0,0,0}};
+	static struct tikzarrow      cur_f = {NOARROW,0,0,{0,0.0,0.0,0.0,0,0}};
 	struct tikzarrow    b, f;
 	struct settings	    *d = NULL;
 	bool		    set_back, set_forw;
@@ -1518,16 +1565,16 @@ set_arrows(F_arrow *back, F_arrow *forw)
 	}
 
 #define	OPTIONS_EQUAL(a,b)	a.has_options == b.has_options && \
-		(a.has_options == false || a.thickness == b.thickness \
+		(a.has_options == false || (a.thickness == b.thickness \
 			&& a.wid == b.wid && a.ht == b.ht \
-			&& a.setflags == b.setflags && a.flags == b.flags)
+			&& a.setflags == b.setflags && a.flags == b.flags))
 
 	/* Which arrows must be set */
 	if (!(b.type == NOARROW && cur_b.type == NOARROW)
 		&& (b.type != cur_b.type
 		    || b.s.has_options != cur_b.s.has_options
-		    || b.s.has_options && cur_b.s.has_options
-			&& !(OPTIONS_EQUAL(b.s, cur_b.s)))) {
+		    || (b.s.has_options && cur_b.s.has_options
+			&& !(OPTIONS_EQUAL(b.s, cur_b.s))))) {
 	    set_back = true;
 	    assign_arrow(&b, &cur_b);
 	} else {
@@ -1536,8 +1583,8 @@ set_arrows(F_arrow *back, F_arrow *forw)
 	if (!(f.type == NOARROW && cur_f.type == NOARROW)
 		&& (f.type != cur_f.type
 		    || f.s.has_options != cur_f.s.has_options
-		    || f.s.has_options && cur_f.s.has_options
-			&& !(OPTIONS_EQUAL(f.s, cur_f.s)))) {
+		    || (f.s.has_options && cur_f.s.has_options
+			&& !(OPTIONS_EQUAL(f.s, cur_f.s))))) {
 	    set_forw = true;
 	    assign_arrow(&f, &cur_f);
 	} else {
@@ -1594,7 +1641,7 @@ gentikz_line(F_line *l)
 		return;
 	    set_width(l->thickness);
 	    set_linecolor(l->pen_color);
-	    if (p->next == NULL) {
+	    if (p->next == NULL) {	/* a single point */
 		if (l->cap_style == ROUNDCAP) {
 		    set_capstyle(l->cap_style);
 		    fprintf(tfp, "\\draw (%d,%d);\n",
@@ -1602,12 +1649,13 @@ gentikz_line(F_line *l)
 		} else {
 		    double	h;
 		    set_capstyle(BUTTCAP);
+		    set_arrows((F_arrow *) NULL, (F_arrow *) NULL);
 		    h = THICKNESS(l->thickness)/2.;
 		    fprintf(tfp, "\\draw (%d,%d)--(%d,%d);\n",
 			    XCOORD(round(p->x - h)), YCOORD(p->y),
 			    XCOORD(round(p->x + h)), YCOORD(p->y));
 		}
-	    } else { /* q->next == NULL */
+	    } else { /* q->next == NULL, two points */
 		set_capstyle(l->cap_style);
 		set_stipple(l->style, l->style_val);
 		set_arrows(l->back_arrow, l->for_arrow);
@@ -1628,6 +1676,9 @@ gentikz_line(F_line *l)
 	if (l->thickness <= 0 && l->fill_style == UNFILLED &&
 			!l->for_arrow && !l->back_arrow)
 	    return;
+
+	if (l->type == T_BOX || l->type == T_POLYGON || l->type == T_POLYLINE)
+	    set_joinstyle(l->join_style);
 
 	if (l->type == T_BOX || l->type == T_POLYGON || l->type == T_ARC_BOX) {
 	    PUT_DRAWCMD(l, false, l->cap_style);
@@ -1654,6 +1705,7 @@ gentikz_line(F_line *l)
 void
 gentikz_spline(F_spline *s)
 {
+	print_comments("% ", s->comments, "");
 	fprintf(stderr, "Can't generate spline; omitting object\n");
 }
 
@@ -1663,7 +1715,7 @@ gentikz_ellipse(F_ellipse *e)
 	if (verbose)
 	    fputs("%%\n%% Fig ELLIPSE object\n%%\n", tfp);
 
-	print_comments("% ",e->comments, "");
+	print_comments("% ", e->comments, "");
 
 	if (e->thickness <= 0 && e->fill_style == UNFILLED) return;
 
@@ -1729,7 +1781,7 @@ put_font(F_text *t)
 /*
  * Put the text, e.g.,
  *   \pgfsetfillcolor{blue}   % \pgftext obeys \pgfsetfillcolor
- *   \pgftext[base,left,at=\pgfqpointxy{3}{2},rotate=45] {Text here!};
+ *   \pgftext[base,left,at=\pgfqpointxy{3}{2},rotate=45] {Text here!}
  * Order ist important! First at=..., then rotate=... !
  */
 void
@@ -1741,7 +1793,7 @@ gentikz_text(F_text *t)
 	    fprintf(tfp, "%%\n%% Fig TEXT object\n%%\n");
 
 	/* print any comments prefixed with "%" */
-	print_comments("% ",t->comments, "");
+	print_comments("% ", t->comments, "");
 
 	set_fillcolor(t->color, NUMSHADES - 1);
 
@@ -1794,7 +1846,7 @@ gentikz_text(F_text *t)
 	    for (cp = (unsigned char*)t->cstring; *cp; ++cp) {
 		if (strchr("$&%#_{}", *cp))
 		    fputc('\\', tfp);
-		if (c = strchr("~^\\", *cp)) {
+		if ((c = strchr("~^\\", *cp))) {
 		    if (*c == '\\')
 			fprintf(tfp,"\\textbackslash ");
 		    else
@@ -1804,7 +1856,6 @@ gentikz_text(F_text *t)
 	    }
 	} else for (cp = (unsigned char*)t->cstring; *cp; ++cp) {
 #ifdef I18N
-	    extern bool support_i18n;
 	    if (support_i18n && (t->font <= 2))
 		fputc(*cp, tfp);
 	    else
@@ -1824,7 +1875,7 @@ gentikz_text(F_text *t)
 	    } else
 		fputc(*cp, tfp);
 	}
-	fputs("};\n", tfp);
+	fputs("}\n", tfp);
 }
 
 void
@@ -1838,7 +1889,7 @@ gentikz_arc(F_arc *a)
 	    fprintf(tfp, "%%\n%% Fig ARC object\n%%\n");
 
 	/* print any comments prefixed with "%" */
-	print_comments("% ",a->comments, "");
+	print_comments("% ", a->comments, "");
 
 	if (a->thickness <= 0 && a->fill_style == UNFILLED &&
 			!a->for_arrow && !a->back_arrow)
@@ -1859,17 +1910,19 @@ gentikz_arc(F_arc *a)
 
 	/* direction == 0 clockwise, 1 counterclockwise */
 	if (a->direction) {	/* counter-clockwise */
-	    if (angle1 > angle2)
+	    if (angle1 > angle2) {
 		if (angle1 > 180.)
 		    angle1 -= 360.;
 		else
 		    angle2 += 360.;
+	    }
 	} else {	/* !a->direction, clockwise */
-	    if (angle1 < angle2)
+	    if (angle1 < angle2) {
 		if (angle1 > 180.)
 		    angle2 -= 360.;
 		else
 		    angle1 += 360.;
+	    }
 	}
 
 	if (a->thickness > 0 && a->type == T_PIE_WEDGE_ARC)
