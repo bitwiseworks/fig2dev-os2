@@ -134,8 +134,10 @@ static bool iso_text_exist(F_compound *ob);
 static bool ellipse_exist(F_compound *ob);
 static bool approx_spline_exist(F_compound *ob);
 static void draw_gridline(float x1, float y1, float x2, float y2);
+#ifdef HAVE_X11_XPM_H
 static void convert_xpm_colors(unsigned char cmap[3][MAXCOLORMAPSIZE],
 		XpmColor *coltabl, int ncols);
+#endif
 static void genps_itp_spline(F_spline *s);
 static void genps_ctl_spline(F_spline *s);
 
