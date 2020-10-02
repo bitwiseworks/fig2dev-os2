@@ -1,18 +1,19 @@
 /*
- * TransFig: Facility for Translating Fig code
+ * Fig2dev: Translate Fig code to various Devices
  * Copyright (c) 1985 Supoj Sutanthavibul
  * Copyright (c) 1991 Micah Beck
- * Parts Copyright (c) 1989-2010 by Brian V. Smith
- * Parts Copyright (c) 2015,2016 Thomas Loimer
+ * Parts Copyright (c) 1989-2015 by Brian V. Smith
+ * Parts Copyright (c) 2015-2019 Thomas Loimer
  *
  * Any party obtaining a copy of these files is granted, free of charge, a
  * full and unrestricted irrevocable, world-wide, paid up, royalty-free,
- * nonexclusive right and license to deal in this software and
- * documentation files (the "Software"), including without limitation the
- * rights to use, copy, modify, merge, publish and/or distribute copies of
- * the Software, and to permit persons who receive copies from any such
- * party to do so, with the only requirement being that this copyright
- * notice remain intact.
+ * nonexclusive right and license to deal in this software and documentation
+ * files (the "Software"), including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense and/or sell copies
+ * of the Software, and to permit persons who receive copies from any such
+ * party to do so, with the only requirement being that the above copyright
+ * and this permission notice remain intact.
+ *
  */
 
 /*
@@ -42,15 +43,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "bool.h"
 #include "pi.h"
 
-#include "fig2dev.h"
+#include "fig2dev.h"	/* includes "bool.h" */
 #include "object.h"	/* does #include <X11/xpm.h> */
 #include "bound.h"
 #include "localmath.h"
-
-extern bool	adjust_boundingbox;		/* fig2dev.c */
 
 #undef M_PI_2
 #undef M_2PI
@@ -84,51 +82,53 @@ struct _arrow_shape arrow_shapes[NUMARROWS] = {	/* NUMARROWS def'd in fig2dev.h 
 	/* number of points, index of tip, {datapairs} */
 	/* last point must be upper-left point of tail */
 	/* type 0 */
-	{ 3, 1, 0, 0, true, false, 2.15, {{-1,-0.5}, {0,0}, {-1,0.5}}},
+	{ 3, 1, 0, 0, true, false, 2.15, {{-1,-0.5}, {0,0}, {-1,0.5}}, {{0,0}}},
 	/* place holder for what would be type 0 filled */
-	{ 0 },
+	/*	values and at least one point required to silence
+		"missing field initializer" warning */
+	{ 0, 0, 0, 0, false, false, 0.0, {{0,0}}, {{0,0}}},
 	/* type 1a simple triangle */
 	{ 4, 1, 0, 2, true, false, 2.1,
-		{{-1.0,0.5}, {0,0}, {-1.0,-0.5}, {-1.0,0.5}}},
+		{{-1.0,0.5}, {0,0}, {-1.0,-0.5}, {-1.0,0.5}}, {{0,0}}},
 	/* type 1b filled simple triangle*/
 	{ 4, 1, 0, 2, true, false, 2.1,
-		{{-1.0,0.5}, {0,0}, {-1.0,-0.5}, {-1.0,0.5}}},
+		{{-1.0,0.5}, {0,0}, {-1.0,-0.5}, {-1.0,0.5}}, {{0,0}}},
 	/* type 2a concave spearhead */
 	{ 5, 1, 0, 2, true, false, 2.6,
-		{{-1.25,0.5},{0,0},{-1.25,-0.5},{-1.0,0},{-1.25,0.5}}},
+		{{-1.25,0.5},{0,0},{-1.25,-0.5},{-1.0,0},{-1.25,0.5}}, {{0,0}}},
 	/* type 2b filled concave spearhead */
 	{ 5, 1, 0, 2, true, false, 2.6,
-		{{-1.25,0.5},{0,0},{-1.25,-0.5},{-1.0,0},{-1.25,0.5}}},
+		{{-1.25,0.5},{0,0},{-1.25,-0.5},{-1.0,0},{-1.25,0.5}}, {{0,0}}},
 	/* type 3a convex spearhead */
 	{ 5, 1, 0, 2, true, false, 1.5,
-		{{-0.75,0.5},{0,0},{-0.75,-0.5},{-1.0,0},{-0.75,0.5}}},
+		{{-0.75,0.5},{0,0},{-0.75,-0.5},{-1.0,0},{-0.75,0.5}}, {{0,0}}},
 	/* type 3b filled convex spearhead */
 	{ 5, 1, 0, 2, true, false, 1.5,
-		{{-0.75,0.5},{0,0},{-0.75,-0.5},{-1.0,0},{-0.75,0.5}}},
+		{{-0.75,0.5},{0,0},{-0.75,-0.5},{-1.0,0},{-0.75,0.5}}, {{0,0}}},
 	/* type 4a diamond */
 	{ 5, 1, 0, 2, true, false, 1.15,
-		{{-0.5,0.5},{0,0},{-0.5,-0.5},{-1.0,0},{-0.5,0.5}}},
+		{{-0.5,0.5},{0,0},{-0.5,-0.5},{-1.0,0},{-0.5,0.5}}, {{0,0}}},
 	/* type 4b filled diamond */
 	{ 5, 1, 0, 2, true, false, 1.15,
-		{{-0.5,0.5},{0,0},{-0.5,-0.5},{-1.0,0},{-0.5,0.5}}},
+		{{-0.5,0.5},{0,0},{-0.5,-0.5},{-1.0,0},{-0.5,0.5}}, {{0,0}}},
 	/* type 5a/b circle - handled in code */
-	{ 0, 0, 0, 0, true, false, 0.0 },
-	{ 0, 0, 0, 0, true, false, 0.0 },
+	{ 0, 0, 0, 0, true, false, 0.0, {{0,0}}, {{0,0}} },
+	{ 0, 0, 0, 0, true, false, 0.0, {{0,0}}, {{0,0}} },
 	/* type 6a/b half circle - handled in code */
-	{ 0, 0, 0, 0, true, false, -1.0 },
-	{ 0, 0, 0, 0, true, false, -1.0 },
+	{ 0, 0, 0, 0, true, false, -1.0, {{0,0}}, {{0,0}} },
+	{ 0, 0, 0, 0, true, false, -1.0, {{0,0}}, {{0,0}} },
 	/* type 7a square */
 	{ 5, 1, 0, 3, true, false, 0.0,
-		{{-1.0,0.5},{0,0.5},{0,-0.5},{-1.0,-0.5},{-1.0,0.5}}},
+		{{-1.0,0.5},{0,0.5},{0,-0.5},{-1.0,-0.5},{-1.0,0.5}}, {{0,0}}},
 	/* type 7b filled square */
 	{ 5, 1, 0, 3, true, false, 0.0,
-		{{-1.0,0.5},{0,0.5},{0,-0.5},{-1.0,-0.5},{-1.0,0.5}}},
+		{{-1.0,0.5},{0,0.5},{0,-0.5},{-1.0,-0.5},{-1.0,0.5}}, {{0,0}}},
 	/* type 8a reverse triangle */
 	{ 4, 1, 0, 1, true, false, 0.0,
-		{{0,0.5},{0,-0.5},{-1.0,0},{0,0.5}}},
+		{{0,0.5},{0,-0.5},{-1.0,0},{0,0.5}}, {{0,0}}},
 	/* type 8b filled reverse triangle */
 	{ 4, 1, 0, 1, true, false, 0.0,
-		{{0,0.5},{0,-0.5},{-1.0,0},{0,0.5}}},
+		{{0,0.5},{0,-0.5},{-1.0,0},{0,0.5}}, {{0,0}}},
 	/* type 9a top-half filled concave spearhead */
 	{ 5, 1, 3, 2, false, false, 2.6,
 		{{-1.25,0.5},{0,0},{-1.25,-0.5},{-1.0,0},{-1.25,0.5}},
@@ -139,32 +139,32 @@ struct _arrow_shape arrow_shapes[NUMARROWS] = {	/* NUMARROWS def'd in fig2dev.h 
 		{{-1.25,0.5},{0,0},{-1,0}}},
 	/* type 10o top-half simple triangle */
 	{ 4, 1, 0, 2, true, true, 2.5,
-		{{-1.0,0.5}, {0,0}, {-1,0.0}, {-1.0,0.5}}},
+		{{-1.0,0.5}, {0,0}, {-1,0.0}, {-1.0,0.5}}, {{0,0}}},
 	/* type 10f top-half filled simple triangle*/
 	{ 4, 1, 0, 2, true, true, 2.5,
-		{{-1.0,0.5}, {0,0}, {-1,0.0}, {-1.0,0.5}}},
+		{{-1.0,0.5}, {0,0}, {-1,0.0}, {-1.0,0.5}}, {{0,0}}},
 	/* type 11o top-half concave spearhead */
 	{ 4, 1, 0, 2, true, true, 3.5,
-		{{-1.25,0.5}, {0,0}, {-1,0}, {-1.25,0.5}}},
+		{{-1.25,0.5}, {0,0}, {-1,0}, {-1.25,0.5}}, {{0,0}}},
 	/* type 11f top-half filled concave spearhead */
 	{ 4, 1, 0, 2, true, true, 3.5,
-		{{-1.25,0.5}, {0,0}, {-1,0}, {-1.25,0.5}}},
+		{{-1.25,0.5}, {0,0}, {-1,0}, {-1.25,0.5}}, {{0,0}}},
 	/* type 12o top-half convex spearhead */
 	{ 4, 1, 0, 2, true, true, 2.5,
-		{{-0.75,0.5}, {0,0}, {-1,0}, {-0.75,0.5}}},
+		{{-0.75,0.5}, {0,0}, {-1,0}, {-0.75,0.5}}, {{0,0}}},
 	/* type 12f top-half filled convex spearhead */
 	{ 4, 1, 0, 2, true, true, 2.5,
-		{{-0.75,0.5}, {0,0}, {-1,0}, {-0.75,0.5}}},
+		{{-0.75,0.5}, {0,0}, {-1,0}, {-0.75,0.5}}, {{0,0}}},
 	/* type 13a "wye" */
-	{ 3, 0, 0, 0, true, false, -1.0, {{0,-0.5},{-1.0,0},{0,0.5}}},
+	{ 3, 0, 0, 0, true, false, -1.0, {{0,-0.5},{-1.0,0},{0,0.5}}, {{0,0}}},
 	/* type 13b bar */
-	{ 2, 1, 0, 0, true, false, 0.0, {{0,-0.5},{0,0.5}}},
+	{ 2, 1, 0, 0, true, false, 0.0, {{0,-0.5},{0,0.5}}, {{0,0}}},
 	/* type 14a two-prong fork */
 	{ 4, 0, 0, 0, true, false, -1.0,
-		{{0,-0.5},{-1.0,-0.5},{-1.0,0.5},{0,0.5}}},
+		{{0,-0.5},{-1.0,-0.5},{-1.0,0.5},{0,0.5}}, {{0,0}}},
 	/* type 14b backward two-prong fork */
 	{ 4, 1, 0, 0, true, false, 0.0,
-		{{-1.0,-0.5,},{0,-0.5},{0,0.5},{-1.0,0.5}}}
+		{{-1.0,-0.5,},{0,-0.5},{0,0.5},{-1.0,0.5}}, {{0,0}}}
 };
 
 void
@@ -905,7 +905,7 @@ calc_arrow(int x1, int y1, int x2, int y2, int linethick, F_arrow *arrow,
 	    /*
 	     * CIRCLE and HALF-CIRCLE arrowheads
 	     *
-	     * We approximate circles with (40+zoom)/4 points
+	     * We approximate circles with 40 points
 	     */
 	    double	maxx;
 	    double	fix_x, fix_y, xs, ys;
@@ -936,8 +936,8 @@ calc_arrow(int x1, int y1, int x2, int y2, int linethick, F_arrow *arrow,
 	    dy = my - ys;
 	    fix_x = xs + (dx / 2.0);
 	    fix_y = ys + (dy / 2.0);
-	    /* choose number of points for circle - 40+mag/4 points */
-	    *npoints = np = round(mag/4.0) + 40;
+	    /* choose number of points for circle */
+	    *npoints = np = 40;
 
 	    if (type == 5) {
 		/* full circle */

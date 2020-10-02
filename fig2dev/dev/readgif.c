@@ -1,19 +1,26 @@
 /*
- * TransFig: Facility for Translating Fig code
- * Parts Copyright (c) 1989-2002 by Brian V. Smith
+ * Fig2dev: Translate Fig code to various Devices
+ * Parts Copyright (c) 1989-2015 by Brian V. Smith
+ * Parts Copyright (c) 2015-2019 by Thomas Loimer
  *
  * Any party obtaining a copy of these files is granted, free of charge, a
  * full and unrestricted irrevocable, world-wide, paid up, royalty-free,
- * nonexclusive right and license to deal in this software and
- * documentation files (the "Software"), including without limitation the
- * rights to use, copy, modify, merge, publish and/or distribute copies of
- * the Software, and to permit persons who receive copies from any such
- * party to do so, with the only requirement being that this copyright
- * notice remain intact.
+ * nonexclusive right and license to deal in this software and documentation
+ * files (the "Software"), including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense and/or sell copies
+ * of the Software, and to permit persons who receive copies from any such
+ * party to do so, with the only requirement being that the above copyright
+ * and this permission notice remain intact.
  *
  */
 
-/* The following code is extracted from giftoppm.c, from the pbmplus package */
+/*
+ * readgif.c: import gif into PostScript
+ *
+ */
+
+/* Some of the following code is extracted from giftoppm.c,
+   from the pbmplus package */
 
 /* +-------------------------------------------------------------------+ */
 /* | Copyright 1990, David Koblas.                                     | */
@@ -30,36 +37,20 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <limits.h>
-#include "bool.h"
 
-#include "fig2dev.h"
+#include "fig2dev.h"	/* includes "bool.h" */
 #include "object.h"	/* does #include <X11/xpm.h> */
-#include "pathmax.h"
+#include "readpics.h"
 
-								/* readpics.c */
-extern	FILE	*open_picfile(char *name, int *type, bool pipeok,char *retname);
 extern	int	 _read_pcx(FILE *pcxfile, F_pic *pic);		/* readpcx.c */
-
-#define BUFLEN 1024
-
-/* Some of the following code is extracted from giftopnm.c, from the netpbm package */
-
-/* +-------------------------------------------------------------------+ */
-/* | Copyright 1990, David Koblas.                                     | */
-/* |   Permission to use, copy, modify, and distribute this software   | */
-/* |   and its documentation for any purpose and without fee is hereby | */
-/* |   granted, provided that the above copyright notice appear in all | */
-/* |   copies and that both that copyright notice and this permission  | */
-/* |   notice appear in supporting documentation.  This software is    | */
-/* |   provided "as is" without express or implied warranty.           | */
-/* +-------------------------------------------------------------------+ */
-
-
 static bool	 ReadColorMap(FILE *, unsigned int,
-		unsigned char cmap[3][MAXCOLORMAPSIZE]);
+				unsigned char cmap[3][MAXCOLORMAPSIZE]);
 static bool	 DoGIFextension(FILE *, int);
 static int	 GetDataBlock(FILE *, unsigned char *);
 
@@ -93,10 +84,10 @@ struct {
 int
 read_gif(char *filename, int filetype, F_pic *pic, int *llx, int *lly)
 {
-	char		 buf[BUFLEN],pcxname[PATH_MAX];
-	char		 realname[PATH_MAX];
+	char		 buf[512];
+	char		 *realname, *cmd;
 	FILE		*file, *giftopcx;
-	int		 i, stat, size;
+	int		 i, stat;
 	int		 useGlobalColormap;
 	unsigned int	 bitPixel;
 	unsigned char	 c;
@@ -104,8 +95,9 @@ read_gif(char *filename, int filetype, F_pic *pic, int *llx, int *lly)
 	unsigned char    transp[3]; /* RGB of transparent color (if any) */
 
 	/* open the file */
-	if ((file=open_picfile(filename, &filetype, false, realname)) == NULL) {
-		fprintf(stderr,"No such GIF file: %s\n",realname);
+	if ((file = open_picfile(filename,&filetype,false,&realname)) == NULL) {
+		free(realname);
+		fprintf(stderr,"No such GIF file: %s\n", filename);
 		return 0;
 	}
 
@@ -125,11 +117,13 @@ read_gif(char *filename, int filetype, F_pic *pic, int *llx, int *lly)
 	version[3] = '\0';
 
 	if ((strcmp(version, "87a") != 0) && (strcmp(version, "89a") != 0)) {
+		free(realname);
 		fprintf(stderr,"Unknown GIF version %s\n",version);
 		return 0;
 	}
 
 	if (! ReadOK(file,buf,7)) {
+		free(realname);
 		return 0;		/* failed to read screen descriptor */
 	}
 
@@ -142,6 +136,7 @@ read_gif(char *filename, int filetype, F_pic *pic, int *llx, int *lly)
 
 	if (BitSet(buf[4], LOCALCOLORMAP)) {	/* Global Colormap */
 		if (!ReadColorMap(file,GifScreen.BitPixel,pic->cmap)) {
+			free(realname);
 			return 0;	/* error reading global colormap */
 		}
 	}
@@ -151,26 +146,29 @@ read_gif(char *filename, int filetype, F_pic *pic, int *llx, int *lly)
 
 	for (;;) {
 		if (! ReadOK(file,&c,1)) {
+			free(realname);
 			return 0;	/* EOF / read error on image data */
 		}
 
-		if (c == ';') {			/* GIF terminator, finish up */
-			break;			/* all done */
+		if (c == ';') {		/* GIF terminator, finish up */
+			break;		/* all done */
 		}
 
-		if (c == '!') {			/* Extension */
+		if (c == '!') {		/* Extension */
 		    if (! ReadOK(file,&c,1))
-			fprintf(stderr,"GIF read error on extension function code\n");
+			fprintf(stderr,
+				"GIF read error on extension function code\n");
 		    (void) DoGIFextension(file, c);
 		    continue;
 		}
 
-		if (c != ',') {			/* Not a valid start character */
+		if (c != ',') {		/* Not a valid start character */
 			continue;
 		}
 
 		if (! ReadOK(file,buf,9)) {
-			return 1;	/* couldn't read left/top/width/height */
+			free(realname);
+			return 0;      /* couldn't read left/top/width/height */
 		}
 
 		useGlobalColormap = ! BitSet(buf[8], LOCALCOLORMAP);
@@ -179,11 +177,12 @@ read_gif(char *filename, int filetype, F_pic *pic, int *llx, int *lly)
 
 		if (! useGlobalColormap) {
 		    if (!ReadColorMap(file, bitPixel, pic->cmap)) {
-			fprintf(stderr,"error reading local GIF colormap\n" );
-			return 1;
+			free(realname);
+			fprintf(stderr, "error reading local GIF colormap\n");
+			return 0;
 		    }
 		}
-		break;				/* image starts here, header is done */
+		break;			/* image starts here, header is done */
 	}
 
 	/* output PostScript comment */
@@ -202,31 +201,24 @@ read_gif(char *filename, int filetype, F_pic *pic, int *llx, int *lly)
 	fseek(file, 0, SEEK_SET);
 
 	/* now call giftopnm and ppmtopcx */
-
-	/* make name for temp output file */
-	sprintf(pcxname, "%s/%s%06d.pix", TMPDIR, "xfig-pcx", getpid());
-	/* make command to convert gif to pcx into temp file */
-	sprintf(buf, "giftopnm -quiet | ppmtopcx -quiet > %s 2> /dev/null", pcxname);
-	if ((giftopcx = popen(buf,"w" )) == 0) {
-	    fprintf(stderr,"Cannot open pipe to giftoppm\n");
-	    return 0;
+	if ((cmd = malloc(strlen(realname) + 50)) == NULL) {
+		fputs("Not enough memory to store command string.\n", stderr);
+		free(realname);
+		return 0;
 	}
-	while ((size=fread(buf, 1, BUFLEN, file)) != 0) {
-	    fwrite(buf, size, 1, giftopcx);
+	sprintf(cmd, "giftopnm -quiet %s | ppmtopcx -quiet 2>/dev/null",
+		realname);
+	free(realname);
+	if ((giftopcx = popen(cmd, "r")) == 0) {
+		fprintf(stderr, "Cannot open pipe from giftopnm | ppmtopcx.\n");
+		free(cmd);
+		return 0;
 	}
-	/* close pipe */
-	pclose(giftopcx);
-	if ((giftopcx = fopen(pcxname, "rb")) == NULL) {
-	    fprintf(stderr,"Can't open temp output file\n");
-	    return 0;
-	}
+	free(cmd);
 	/* now call _read_pcx to read the pcx file */
 	stat = _read_pcx(giftopcx, pic);
 	/* close file */
-	fclose(giftopcx);
-
-	/* remove temp file */
-	unlink(pcxname);
+	pclose(giftopcx);
 
 	/* now match original transparent colortable index with possibly new
 	   colortable from ppmtopcx */
@@ -248,7 +240,7 @@ static bool
 ReadColorMap(FILE *fd, unsigned int number,
 		unsigned char cmap[3][MAXCOLORMAPSIZE])
 {
-	int		i;
+	unsigned int	i;
 	unsigned char	rgb[3];
 
 	for (i = 0; i < number; ++i) {

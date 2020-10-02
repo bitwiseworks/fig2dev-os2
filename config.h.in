@@ -7,6 +7,12 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Define to the name of the ghostscript command. */
+#undef GSEXE
+
+/* Define to 1 if you have the `fdopen' function. */
+#undef HAVE_FDOPEN
+
 /* Define to 1 if you have the `gethostname' function. */
 #undef HAVE_GETHOSTNAME
 
@@ -28,6 +34,9 @@
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `mkstemp' function. */
+#undef HAVE_MKSTEMP
 
 /* Define to 1 if you have the <png.h> header file. */
 #undef HAVE_PNG_H
@@ -90,7 +99,8 @@
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
-/* Define to 1 if you have the `_setmode' function. */
+/* Define to 1 if you are under Windows and have _setmode() to set file modes
+   to text or binary. */
 #undef HAVE__SETMODE
 
 /* Define to 1 to use internationalization of text input for some drivers. */
@@ -129,6 +139,9 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Define to the full path of the X color database file. */
+#undef RGB_FILE
 
 /* Define to 1 if pict2e-graphics should honor \XFigwidth or \XFigheight. */
 #undef SCALE_PICT2E

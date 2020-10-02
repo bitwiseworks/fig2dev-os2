@@ -1,6 +1,22 @@
 #! /bin/sh
 # Generated from testsuite.at by GNU Autoconf 2.69.
 #
+# Fig2dev: Translate Fig code to various Devices
+# Copyright (c) 1991 by Micah Beck
+# Parts Copyright (c) 1985-1988 by Supoj Sutanthavibul
+# Parts Copyright (c) 1989-2015 by Brian V. Smith
+# Parts Copyright (c) 2015-2018 by Thomas Loimer
+#
+# Any party obtaining a copy of these files is granted, free of charge, a
+# full and unrestricted irrevocable, world-wide, paid up, royalty-free,
+# nonexclusive right and license to deal in this software and documentation
+# files (the "Software"), including without limitation the rights to use,
+# copy, modify, merge, publish, distribute, sublicense and/or sell copies
+# of the Software, and to permit persons who receive copies from any such
+# party to do so, with the only requirement being that the above copyright
+# and this permission notice remain intact.
+#
+#
 # Copyright (C) 2009-2012 Free Software Foundation, Inc.
 #
 # This test suite is free software; the Free Software Foundation gives
@@ -590,35 +606,70 @@ at_tested='fig2dev'
 # numerical order.
 at_format='??'
 # Description of all the test groups.
-at_help_all="1;read_sanitize.at:3;co-incident points;read.c coincident;
-2;read_sanitize.at:16;open rectangle;read.c open;
-3;read_sanitize.at:27;open arc box;read.c open;
-4;read_sanitize.at:38;open polygon;read.c open;
-5;read_sanitize.at:49;convert box to polygon;read.c polygon;
-6;read_sanitize.at:60;convert malformed, open box to a polygon;read.c open polygon;
-7;read_sanitize.at:72;fail on a malformed arc-box;read.c malformed arc-box;
-8;read_sanitize.at:83;fail on a distorted arc-box;read.c distorted arc-box;
-9;read_sanitize.at:94;fail on a distorted arc-box;read.c distorted arc-box;
-10;read_sanitize.at:105;remove arrows tips from single point;read.c polyline;
-11;pict2e.at:42;ignore -G option;pict2e options;
-12;tikz.at:2;conditionally allocate \\XFigu;tikz newdimen;
-13;tikz.at:28;pattern with stroke color equal to fill color;tikz pattern;
-14;svg.at:2;compare patterns with template;svg pattern creationdate;
-15;svg.at:40;compare fills with arrows to template;svg arrows pattern fill creationdate;
-16;arrows_eps.at:2;compare arrow tips with template;eps arrows;
-17;lookup_X_color.at:3;accept correct hexadecimal rgb-values;colors hex;
-18;lookup_X_color.at:15;fail on malformed hexadecimal rgb-values;colors hex;
-19;lookup_X_color.at:26;read color database .../rgb.txt;colors names;
-20;creationdate.at:3;honor SOURCE_DATE_EPOCH environment variable;eps creationdate source_date_epoch;
-21;creationdate.at:10;fail on text in SOURCE_DATE_EPOCH;eps creationdate source_date_epoch;
-22;bitmaps.at:3;gif;bitmaps gif;
-23;bitmaps.at:12;jpeg;bitmaps jpeg jpg;
-24;bitmaps.at:21;pcx;bitmaps pcx;
-25;bitmaps.at:30;png;bitmaps png;
-26;bitmaps.at:39;ppm;bitmaps gif;
-27;bitmaps.at:48;tiff;bitmaps tiff tif;
-28;bitmaps.at:57;xbm;bitmaps xbm;
-29;bitmaps.at:66;xpm;bitmaps xpm;
+at_help_all="1;input.at:25;do not overwrite .fig file;fig2dev.c;
+2;input.at:36;accept correct hexadecimal rgb-values;colors hex;
+3;input.at:48;fail on malformed hexadecimal rgb-values;colors hex;
+4;input.at:59;use built-in color database, blanks in names;colors names;
+5;input.at:66;\$i18ndir/cs_CZ.ps must exist;installpath;
+6;input.at:84;name in fig file img.gz, file img.gz, pipe ok;readpics gz imgpipe;
+7;input.at:94;name in fig file img.Z, file img.Z, no pipe;readpics z imgfile;
+8;input.at:102;name in fig file img, file img.gz, pipe ok;readpics gz imgpipe;
+9;input.at:111;name in fig file img, file img.z, no pipe;readpics z imgfile;
+10;input.at:120;name in fig file img, file img.Z, pipe ok;readpics z imgpipe;
+11;input.at:129;absolute path in fig file, pipe ok;readpics fullpath imgpipe;
+12;read.at:22;co-incident points;read.c coincident;
+13;read.at:35;open rectangle;read.c open;
+14;read.at:46;open arc box;read.c open;
+15;read.at:57;open polygon;read.c open;
+16;read.at:68;convert box to polygon;read.c polygon;
+17;read.at:79;convert malformed, open box to a polygon;read.c open polygon;
+18;read.at:91;fail on a malformed arc-box;read.c malformed arc-box;
+19;read.at:102;fail on a distorted arc-box;read.c distorted arc-box;
+20;read.at:113;fail on a distorted arc-box;read.c distorted arc-box;
+21;read.at:124;remove arrows tips from single point;read.c polyline;
+22;read.at:138;reject negative font type;read.c font;
+23;read.at:148;allow negative circle or ellipse radii;read.c ellipse;
+24;read.at:157;survive debian bugs #881143, #881144;font pic tikz;
+25;read.at:186;reject out-of-range pattern, debian bug #881396;read.c;
+26;read.at:196;survive debian bug #890016;read1_3.c;
+27;read.at:220;ignore too many comment lines, ticket #25;read.c;
+28;read.at:240;correctly free invalid line object, ticket #26;read1_3.c;
+29;read.at:251;correctly free invalid spline, ticket #27;read.c;
+30;read.at:263;allow last line without newline, ticket #28;read.c;
+31;read.at:271;correctly free invalid line object;read.c;
+32;read.at:283;correctly free invalid line with picture;read.c;
+33;read.at:295;ignore splines with one point, ticket #29;read.c;
+34;read.at:306;ignore splines with one point in format 1.3;read1_3.c;
+35;read.at:317;set invalid color number to default, ticket #30;read.c;
+36;read.at:329;set ppi when reading fig files format 1.3;read1_3.c;
+37;read.at:339;process circle arrow at mag > 42, ticket #52;bound.c;
+38;read.at:364;prepend fig file path to picture file name;read.c picfilename;
+39;output.at:24;compare arrow tips with template;eps arrows;
+40;output.at:50;do not clip 0-width objects having arrows, #53;eps clip0;
+41;output.at:94;honor SOURCE_DATE_EPOCH environment variable;eps creationdate source_date_epoch;
+42;output.at:101;fail on text in SOURCE_DATE_EPOCH;eps creationdate source_date_epoch;
+43;output.at:151;ignore -G option;pict2e options;
+44;output.at:161;accept large coordinates;pict2e;
+45;output.at:180;compare patterns with template;svg pattern creationdate;
+46;output.at:213;compare fills with arrows to template;svg arrows pattern fill creationdate;
+47;output.at:222;conditionally allocate \\XFigu;tikz newdimen;
+48;output.at:236;pattern with stroke color equal to fill color;tikz pattern;
+49;output.at:248;accept large coordinates;tikz;
+50;bitmaps.at:25;gif;bitmaps gif;
+51;bitmaps.at:33;jpeg;bitmaps jpeg jpg;
+52;bitmaps.at:41;pcx;bitmaps pcx;
+53;bitmaps.at:49;png;bitmaps png;
+54;bitmaps.at:57;png with smoothing;bitmaps png smoothing;
+55;bitmaps.at:65;ppm;bitmaps ppm;
+56;bitmaps.at:73;tiff;bitmaps tiff tif;
+57;bitmaps.at:81;xbm;bitmaps xbm;
+58;bitmaps.at:91;xbm with smoothing;bitmaps xbm smoothing;
+59;bitmaps.at:101;xpm;bitmaps xpm;
+60;bitmaps.at:115;eps with acscii preview;bitmaps tmpfile eps-ascii;
+61;bitmaps.at:123;eps with tiff preview;bitmaps tmpfile eps-tiff;
+62;bitmaps.at:132;epsi;embed epsi;
+63;bitmaps.at:144;postscript, created by fig2dev;embed ps;
+64;bitmaps.at:191;postscript, created by latex;embed ps;
 "
 # List of the all the test groups.
 at_groups_all=`$as_echo "$at_help_all" | sed 's/;.*//'`
@@ -632,7 +683,7 @@ at_fn_validate_ranges ()
   for at_grp
   do
     eval at_value=\$$at_grp
-    if test $at_value -lt 1 || test $at_value -gt 29; then
+    if test $at_value -lt 1 || test $at_value -gt 64; then
       $as_echo "invalid test group: $at_value" >&2
       exit 1
     fi
@@ -931,7 +982,7 @@ fi
 # List of tests.
 if $at_list_p; then
   cat <<_ATEOF || at_write_fail=1
-fig2dev 3.2.6a test suite test groups:
+fig2dev 3.2.7b test suite test groups:
 
  NUM: FILE-NAME:LINE     TEST-GROUP-NAME
       KEYWORDS
@@ -972,8 +1023,24 @@ _ATEOF
   exit $at_write_fail
 fi
 if $at_version_p; then
-  $as_echo "$as_me (fig2dev 3.2.6a)" &&
+  $as_echo "$as_me (fig2dev 3.2.7b)" &&
   cat <<\_ATEOF || at_write_fail=1
+
+Fig2dev: Translate Fig code to various Devices
+Copyright (c) 1991 by Micah Beck
+Parts Copyright (c) 1985-1988 by Supoj Sutanthavibul
+Parts Copyright (c) 1989-2015 by Brian V. Smith
+Parts Copyright (c) 2015-2018 by Thomas Loimer
+
+Any party obtaining a copy of these files is granted, free of charge, a
+full and unrestricted irrevocable, world-wide, paid up, royalty-free,
+nonexclusive right and license to deal in this software and documentation
+files (the "Software"), including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense and/or sell copies
+of the Software, and to permit persons who receive copies from any such
+party to do so, with the only requirement being that the above copyright
+and this permission notice remain intact.
+
 
 Copyright (C) 2012 Free Software Foundation, Inc.
 This test suite is free software; the Free Software Foundation gives
@@ -989,30 +1056,45 @@ case $at_groups in #(
   * ) at_print_banners=false ;;
 esac
 # Text for banner N, set to a single space once printed.
-# Banner 1. read_sanitize.at:1
+# Banner 1. input.at:23
 # Category starts at test group 1.
-at_banner_text_1="Sanitize input files in read.c."
-# Banner 2. pict2e.at:1
-# Category starts at test group 11.
-at_banner_text_2="Test pict2e output language."
-# Banner 3. tikz.at:1
+at_banner_text_1="Correctly process the command line."
+# Banner 2. input.at:34
+# Category starts at test group 2.
+at_banner_text_2="Parse color specifications (test lookup_X_color() in colors.c)"
+# Banner 3. input.at:65
+# Category starts at test group 5.
+at_banner_text_3="Read installed files."
+# Banner 4. input.at:72
+# Category starts at test group 6.
+at_banner_text_4="Find and decompress embedded image files."
+# Banner 5. read.at:20
 # Category starts at test group 12.
-at_banner_text_3="Test tikz output language."
-# Banner 4. svg.at:1
-# Category starts at test group 14.
-at_banner_text_4="Test svg output language."
-# Banner 5. arrows_eps.at:1
-# Category starts at test group 16.
-at_banner_text_5="Test PostScript output language."
-# Banner 6. lookup_X_color.at:1
-# Category starts at test group 17.
-at_banner_text_6="Parse color specifications (test lookup_X_color() in colors.c)"
-# Banner 7. creationdate.at:1
-# Category starts at test group 20.
-at_banner_text_7="Test time stamp in PostScript output"
-# Banner 8. bitmaps.at:1
-# Category starts at test group 22.
-at_banner_text_8="Create and embed bitmaps in fig-file."
+at_banner_text_5="Sanitize and harden input."
+# Banner 6. read.at:362
+# Category starts at test group 38.
+at_banner_text_6="Dynamically allocate picture file name."
+# Banner 7. output.at:22
+# Category starts at test group 39.
+at_banner_text_7="Test PostScript output language."
+# Banner 8. output.at:110
+# Category starts at test group 43.
+at_banner_text_8="Test pict2e output language."
+# Banner 9. output.at:179
+# Category starts at test group 45.
+at_banner_text_9="Test svg output language."
+# Banner 10. output.at:220
+# Category starts at test group 47.
+at_banner_text_10="Test tikz output language."
+# Banner 11. bitmaps.at:20
+# Category starts at test group 50.
+at_banner_text_11="Create and embed bitmaps in fig-file."
+# Banner 12. bitmaps.at:111
+# Category starts at test group 60.
+at_banner_text_12="Creation of temporary files."
+# Banner 13. bitmaps.at:130
+# Category starts at test group 62.
+at_banner_text_13="Embed postscript variants."
 
 # Take any -C into account.
 if $at_change_dir ; then
@@ -1173,11 +1255,11 @@ exec 5>>"$at_suite_log"
 
 # Banners and logs.
 $as_echo "## -------------------------- ##
-## fig2dev 3.2.6a test suite. ##
+## fig2dev 3.2.7b test suite. ##
 ## -------------------------- ##"
 {
   $as_echo "## -------------------------- ##
-## fig2dev 3.2.6a test suite. ##
+## fig2dev 3.2.7b test suite. ##
 ## -------------------------- ##"
   echo
 
@@ -1422,7 +1504,7 @@ IFS=$as_save_IFS
   esac
   if test -f "$at_program_"; then
     {
-      $as_echo "$at_srcdir/testsuite.at:11: $at_program_ --version"
+      $as_echo "$at_srcdir/testsuite.at:20: $at_program_ --version"
       "$at_program_" --version </dev/null
       echo
     } >&5 2>&1
@@ -2021,7 +2103,7 @@ _ASBOX
   $as_echo "Please send $at_msg and all information you think might help:
 
    To: <thomas.loimer@tuwien.ac.at>
-   Subject: [fig2dev 3.2.6a] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
+   Subject: [fig2dev 3.2.7b] $as_me: $at_fail_list${at_fail_list:+ failed${at_xpass_list:+, }}$at_xpass_list${at_xpass_list:+ passed unexpectedly}
 
 You may investigate any problem if you feel able to do so, in which
 case the test suite provides a good starting point.  Its output may
@@ -2036,17 +2118,440 @@ exit 0
 ## Actual tests. ##
 ## ------------- ##
 #AT_START_1
-at_fn_group_banner 1 'read_sanitize.at:3' \
-  "co-incident points" "                             " 1
+at_fn_group_banner 1 'input.at:25' \
+  "do not overwrite .fig file" "                     " 1
 at_xfail=no
 (
   $as_echo "1. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
+# The ge format produces the smalles output.
+{ set +x
+$as_echo "$at_srcdir/input.at:28: fig2dev -L ge \$srcdir/data/line.fig nice.figure.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:28"
+( $at_check_trace; fig2dev -L ge $srcdir/data/line.fig nice.figure.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Outfile is a .fig file, aborting
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/input.at:28"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_1
+#AT_START_2
+at_fn_group_banner 2 'input.at:36' \
+  "accept correct hexadecimal rgb-values" "          " 2
+at_xfail=no
+(
+  $as_echo "2. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:6: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{4\\}'
+$as_echo "$at_srcdir/input.at:38: fig2dev -Leps -g'#1e9' \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:38"
+( $at_check_trace; fig2dev -Leps -g'#1e9' $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:38"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/input.at:40: fig2dev -Leps -g'#11e090' \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:40"
+( $at_check_trace; fig2dev -Leps -g'#11e090' $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:40"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/input.at:42: fig2dev -Leps -g'#114ea090c' \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:42"
+( $at_check_trace; fig2dev -Leps -g'#114ea090c' $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:42"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/input.at:44: fig2dev -Leps -g'#1144ea0f90c0' \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:44"
+( $at_check_trace; fig2dev -Leps -g'#1144ea0f90c0' $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:44"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_2
+#AT_START_3
+at_fn_group_banner 3 'input.at:48' \
+  "fail on malformed hexadecimal rgb-values" "       " 2
+at_xfail=no
+(
+  $as_echo "3. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/input.at:50: fig2dev -Leps -g'#144ea0f90c0' \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:50"
+( $at_check_trace; fig2dev -Leps -g'#144ea0f90c0' $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Can't parse color '#144ea0f90c0', ignoring background option
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:50"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/input.at:54: fig2dev -Leps -g'#30g' \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:54"
+( $at_check_trace; fig2dev -Leps -g'#30g' $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Can't parse color '#30g', ignoring background option
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:54"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_3
+#AT_START_4
+at_fn_group_banner 4 'input.at:59' \
+  "use built-in color database, blanks in names" "   " 2
+at_xfail=no
+(
+  $as_echo "4. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/input.at:61: fig2dev -Leps -g'misty rose' \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:61"
+( $at_check_trace; fig2dev -Leps -g'misty rose' $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:61"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_4
+#AT_START_5
+at_fn_group_banner 5 'input.at:66' \
+  "\$i18ndir/cs_CZ.ps must exist" "                   " 3
+at_xfail=no
+(
+  $as_echo "5. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "input.at:68" >"$at_check_line_file"
+(test "x$INSTALLCHECK" = xno) \
+  && at_fn_check_skip 77 "$at_srcdir/input.at:68"
+{ set +x
+$as_echo "$at_srcdir/input.at:69: \"\$abs_builddir\"/test1"
+at_fn_check_prepare_dynamic "\"$abs_builddir\"/test1" "input.at:69"
+( $at_check_trace; "$abs_builddir"/test1
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:69"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_5
+#AT_START_6
+at_fn_group_banner 6 'input.at:84' \
+  "name in fig file img.gz, file img.gz, pipe ok" "  " 4
+at_xfail=no
+(
+  $as_echo "6. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "input.at:88" >"$at_check_line_file"
+(! gunzip --version || ! gzip --version) \
+  && at_fn_check_skip 77 "$at_srcdir/input.at:88"
+{ set +x
+$as_echo "$at_srcdir/input.at:89: gzip -q -c \$srcdir/data/line.eps >line.eps.gz && \\
+	\$SED '11 s/eps/eps.gz/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:89"
+( $at_check_trace; gzip -q -c $srcdir/data/line.eps >line.eps.gz && \
+	$SED '11 s/eps/eps.gz/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:89"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_6
+#AT_START_7
+at_fn_group_banner 7 'input.at:94' \
+  "name in fig file img.Z, file img.Z, no pipe" "    " 4
+at_xfail=no
+(
+  $as_echo "7. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "input.at:96" >"$at_check_line_file"
+(! gunzip --version || ! gzip --version || ! $GSEXE --version || ! pnmtotiff -version) \
+  && at_fn_check_skip 77 "$at_srcdir/input.at:96"
+{ set +x
+$as_echo "$at_srcdir/input.at:97: gzip -q -c \$srcdir/data/line.eps >line.eps.Z && \\
+	\$SED '11 s/eps/eps.Z/' \$srcdir/data/boxwimg.fig | fig2dev -L tiff
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:97"
+( $at_check_trace; gzip -q -c $srcdir/data/line.eps >line.eps.Z && \
+	$SED '11 s/eps/eps.Z/' $srcdir/data/boxwimg.fig | fig2dev -L tiff
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:97"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_7
+#AT_START_8
+at_fn_group_banner 8 'input.at:102' \
+  "name in fig file img, file img.gz, pipe ok" "     " 4
+at_xfail=no
+(
+  $as_echo "8. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "input.at:104" >"$at_check_line_file"
+(! gunzip --version || ! gzip --version) \
+  && at_fn_check_skip 77 "$at_srcdir/input.at:104"
+# Use cat, so fig2dev looks in the current dir, not in $srcdir/data
+{ set +x
+$as_echo "$at_srcdir/input.at:106: gzip -q -c \$srcdir/data/line.eps >line.eps.gz && \\
+	cat \$srcdir/data/boxwimg.fig | fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:106"
+( $at_check_trace; gzip -q -c $srcdir/data/line.eps >line.eps.gz && \
+	cat $srcdir/data/boxwimg.fig | fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:106"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_8
+#AT_START_9
+at_fn_group_banner 9 'input.at:111' \
+  "name in fig file img, file img.z, no pipe" "      " 4
+at_xfail=no
+(
+  $as_echo "9. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "input.at:113" >"$at_check_line_file"
+(! gunzip --version || ! gzip --version || ! $GSEXE --version || ! pnmtotiff -version) \
+  && at_fn_check_skip 77 "$at_srcdir/input.at:113"
+# Use cat, so fig2dev looks in the current dir, not in $srcdir/data
+{ set +x
+$as_echo "$at_srcdir/input.at:115: gzip -q -c \$srcdir/data/line.eps >line.eps.z && \\
+	cat \$srcdir/data/boxwimg.fig | fig2dev -L tiff
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:115"
+( $at_check_trace; gzip -q -c $srcdir/data/line.eps >line.eps.z && \
+	cat $srcdir/data/boxwimg.fig | fig2dev -L tiff
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:115"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_9
+#AT_START_10
+at_fn_group_banner 10 'input.at:120' \
+  "name in fig file img, file img.Z, pipe ok" "      " 4
+at_xfail=no
+(
+  $as_echo "10. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "input.at:122" >"$at_check_line_file"
+(! gunzip --version || ! gzip --version) \
+  && at_fn_check_skip 77 "$at_srcdir/input.at:122"
+# Use cat, so fig2dev looks in the current dir, not in $srcdir/data
+{ set +x
+$as_echo "$at_srcdir/input.at:124: gzip -q -c \$srcdir/data/line.eps >line.eps.Z && \\
+	cat \$srcdir/data/boxwimg.fig | fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:124"
+( $at_check_trace; gzip -q -c $srcdir/data/line.eps >line.eps.Z && \
+	cat $srcdir/data/boxwimg.fig | fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:124"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_10
+#AT_START_11
+at_fn_group_banner 11 'input.at:129' \
+  "absolute path in fig file, pipe ok" "             " 4
+at_xfail=no
+(
+  $as_echo "11. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+# if the path contains '%', the sed-command below fails
+$as_echo "input.at:132" >"$at_check_line_file"
+(echo $abs_srcdir | $FGREP %) \
+  && at_fn_check_skip 77 "$at_srcdir/input.at:132"
+{ set +x
+$as_echo "$at_srcdir/input.at:133: cp \$srcdir/data/line.eps img.eps && \\
+	\$SED \"11 s%line%\$abs_srcdir/data/img%\" \$srcdir/data/boxwimg.fig | \\
+		fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "input.at:133"
+( $at_check_trace; cp $srcdir/data/line.eps img.eps && \
+	$SED "11 s%line%$abs_srcdir/data/img%" $srcdir/data/boxwimg.fig | \
+		fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/input.at:133"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_11
+#AT_START_12
+at_fn_group_banner 12 'read.at:22' \
+  "co-incident points" "                             " 5
+at_xfail=no
+(
+  $as_echo "12. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:25: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{4\\}'
 #FIG 3.2
 Landscape
 Center
@@ -2061,7 +2566,7 @@ Single
 	1200 9225 0 9225 0 10200 0 10200
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:6"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:25"
 ( $at_check_trace; fig2dev -L pict2e <<EOF | grep 'polygon\(([0-9]*,[0-9]*)\)\{4\}'
 #FIG 3.2
 Landscape
@@ -2082,7 +2587,7 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/read_sanitize.at:6"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:25"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2091,18 +2596,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_1
-#AT_START_2
-at_fn_group_banner 2 'read_sanitize.at:16' \
-  "open rectangle" "                                 " 1
+#AT_STOP_12
+#AT_START_13
+at_fn_group_banner 13 'read.at:35' \
+  "open rectangle" "                                 " 5
 at_xfail=no
 (
-  $as_echo "2. $at_setup_line: testing $at_desc ..."
+  $as_echo "13. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:18: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{4\\}'
+$as_echo "$at_srcdir/read.at:37: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{4\\}'
 #FIG 3.2
 Landscape
 Center
@@ -2116,7 +2621,7 @@ Single
 	 0 10200 1200 10200 1200 9225 0 9225
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:18"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:37"
 ( $at_check_trace; fig2dev -L pict2e <<EOF | grep 'polygon\(([0-9]*,[0-9]*)\)\{4\}'
 #FIG 3.2
 Landscape
@@ -2138,7 +2643,7 @@ echo >>"$at_stderr"; $as_echo "An open rectangle at line 11 - close it.
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/read_sanitize.at:18"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:37"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2146,18 +2651,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_2
-#AT_START_3
-at_fn_group_banner 3 'read_sanitize.at:27' \
-  "open arc box" "                                   " 1
+#AT_STOP_13
+#AT_START_14
+at_fn_group_banner 14 'read.at:46' \
+  "open arc box" "                                   " 5
 at_xfail=no
 (
-  $as_echo "3. $at_setup_line: testing $at_desc ..."
+  $as_echo "14. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:29: fig2dev -L pict2e <<EOF
+$as_echo "$at_srcdir/read.at:48: fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
 Center
@@ -2171,7 +2676,7 @@ Single
 	 0 10200 1200 10200 1200 9225 0 9225
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:29"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:48"
 ( $at_check_trace; fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
@@ -2193,7 +2698,7 @@ echo >>"$at_stderr"; $as_echo "An open rectangle with rounded corners at line 11
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/read_sanitize.at:29"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:48"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2201,18 +2706,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_3
-#AT_START_4
-at_fn_group_banner 4 'read_sanitize.at:38' \
-  "open polygon" "                                   " 1
+#AT_STOP_14
+#AT_START_15
+at_fn_group_banner 15 'read.at:57' \
+  "open polygon" "                                   " 5
 at_xfail=no
 (
-  $as_echo "4. $at_setup_line: testing $at_desc ..."
+  $as_echo "15. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:40: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{4\\}'
+$as_echo "$at_srcdir/read.at:59: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{4\\}'
 #FIG 3.2
 Landscape
 Center
@@ -2226,7 +2731,7 @@ Single
 	 0 10200 600 9825 1200 10200 1200 9225 0 9225
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:40"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:59"
 ( $at_check_trace; fig2dev -L pict2e <<EOF | grep 'polygon\(([0-9]*,[0-9]*)\)\{4\}'
 #FIG 3.2
 Landscape
@@ -2248,7 +2753,7 @@ echo >>"$at_stderr"; $as_echo "An open polygon at line 11 - close it.
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/read_sanitize.at:40"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:59"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2256,18 +2761,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_4
-#AT_START_5
-at_fn_group_banner 5 'read_sanitize.at:49' \
-  "convert box to polygon" "                         " 1
+#AT_STOP_15
+#AT_START_16
+at_fn_group_banner 16 'read.at:68' \
+  "convert box to polygon" "                         " 5
 at_xfail=no
 (
-  $as_echo "5. $at_setup_line: testing $at_desc ..."
+  $as_echo "16. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:51: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{3\\}'
+$as_echo "$at_srcdir/read.at:70: fig2dev -L pict2e <<EOF | grep 'polygon\\(([0-9]*,[0-9]*)\\)\\{3\\}'
 #FIG 3.2
 Landscape
 Center
@@ -2281,7 +2786,7 @@ Single
 	 0 10200 1200 9225 0 9225 0 10200
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:51"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:70"
 ( $at_check_trace; fig2dev -L pict2e <<EOF | grep 'polygon\(([0-9]*,[0-9]*)\)\{3\}'
 #FIG 3.2
 Landscape
@@ -2303,7 +2808,7 @@ echo >>"$at_stderr"; $as_echo "A rectangle with 3 corners at line 11 - convert t
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/read_sanitize.at:51"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:70"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2311,18 +2816,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_5
-#AT_START_6
-at_fn_group_banner 6 'read_sanitize.at:60' \
-  "convert malformed, open box to a polygon" "       " 1
+#AT_STOP_16
+#AT_START_17
+at_fn_group_banner 17 'read.at:79' \
+  "convert malformed, open box to a polygon" "       " 5
 at_xfail=no
 (
-  $as_echo "6. $at_setup_line: testing $at_desc ..."
+  $as_echo "17. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:62: fig2dev -L pict2e <<EOF
+$as_echo "$at_srcdir/read.at:81: fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
 Center
@@ -2336,7 +2841,7 @@ Single
 	 0 10200 1200 9225 0 9225
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:62"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:81"
 ( $at_check_trace; fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
@@ -2359,7 +2864,7 @@ A rectangle with 3 corners at line 11 - convert to a polygon.
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/read_sanitize.at:62"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:81"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2367,18 +2872,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_6
-#AT_START_7
-at_fn_group_banner 7 'read_sanitize.at:72' \
-  "fail on a malformed arc-box" "                    " 1
+#AT_STOP_17
+#AT_START_18
+at_fn_group_banner 18 'read.at:91' \
+  "fail on a malformed arc-box" "                    " 5
 at_xfail=no
 (
-  $as_echo "7. $at_setup_line: testing $at_desc ..."
+  $as_echo "18. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:74: fig2dev -L pict2e <<EOF
+$as_echo "$at_srcdir/read.at:93: fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
 Center
@@ -2388,11 +2893,11 @@ Letter
 Single
 -2
 1200 2
-2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 -1 0 0 4
+2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 60 0 0 4
 	 0 10200 1200 9225 0 9225 0 10200
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:74"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:93"
 ( $at_check_trace; fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
@@ -2403,7 +2908,7 @@ Letter
 Single
 -2
 1200 2
-2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 -1 0 0 4
+2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 60 0 0 4
 	 0 10200 1200 9225 0 9225 0 10200
 EOF
 
@@ -2414,7 +2919,7 @@ echo >>"$at_stderr"; $as_echo "A malformed rectangle with rounded corners at lin
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/read_sanitize.at:74"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:93"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2422,18 +2927,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_7
-#AT_START_8
-at_fn_group_banner 8 'read_sanitize.at:83' \
-  "fail on a distorted arc-box" "                    " 1
+#AT_STOP_18
+#AT_START_19
+at_fn_group_banner 19 'read.at:102' \
+  "fail on a distorted arc-box" "                    " 5
 at_xfail=no
 (
-  $as_echo "8. $at_setup_line: testing $at_desc ..."
+  $as_echo "19. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:85: fig2dev -L pict2e <<EOF
+$as_echo "$at_srcdir/read.at:104: fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
 Center
@@ -2443,11 +2948,11 @@ Letter
 Single
 -2
 1200 2
-2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 -1 0 0 5
+2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 60 0 0 5
 	 0 10200 1210 10200 1200 9225 0 9225 0 10200
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:85"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:104"
 ( $at_check_trace; fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
@@ -2458,7 +2963,7 @@ Letter
 Single
 -2
 1200 2
-2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 -1 0 0 5
+2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 60 0 0 5
 	 0 10200 1210 10200 1200 9225 0 9225 0 10200
 EOF
 
@@ -2469,7 +2974,7 @@ echo >>"$at_stderr"; $as_echo "A distorted or inclined rectangle with rounded co
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/read_sanitize.at:85"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:104"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2477,18 +2982,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_8
-#AT_START_9
-at_fn_group_banner 9 'read_sanitize.at:94' \
-  "fail on a distorted arc-box" "                    " 1
+#AT_STOP_19
+#AT_START_20
+at_fn_group_banner 20 'read.at:113' \
+  "fail on a distorted arc-box" "                    " 5
 at_xfail=no
 (
-  $as_echo "9. $at_setup_line: testing $at_desc ..."
+  $as_echo "20. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:96: fig2dev -L pict2e <<EOF
+$as_echo "$at_srcdir/read.at:115: fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
 Center
@@ -2498,11 +3003,11 @@ Letter
 Single
 -2
 1200 2
-2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 -1 0 0 5
+2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 60 0 0 5
 	 0 10200 1200 10210 1200 9225 0 9225 0 10200
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:96"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:115"
 ( $at_check_trace; fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
@@ -2513,7 +3018,7 @@ Letter
 Single
 -2
 1200 2
-2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 -1 0 0 5
+2 4 0 1 -1 -1 50 -1 -1 0.000 0 0 60 0 0 5
 	 0 10200 1200 10210 1200 9225 0 9225 0 10200
 EOF
 
@@ -2524,7 +3029,7 @@ echo >>"$at_stderr"; $as_echo "A distorted or inclined rectangle with rounded co
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 1 $at_status "$at_srcdir/read_sanitize.at:96"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:115"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2532,18 +3037,18 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_9
-#AT_START_10
-at_fn_group_banner 10 'read_sanitize.at:105' \
-  "remove arrows tips from single point" "           " 1
+#AT_STOP_20
+#AT_START_21
+at_fn_group_banner 21 'read.at:124' \
+  "remove arrows tips from single point" "           " 5
 at_xfail=no
 (
-  $as_echo "10. $at_setup_line: testing $at_desc ..."
+  $as_echo "21. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 { set +x
-$as_echo "$at_srcdir/read_sanitize.at:107: fig2dev -L pict2e <<EOF
+$as_echo "$at_srcdir/read.at:126: fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
 Center
@@ -2559,7 +3064,7 @@ Single
 	0 0
 EOF
 "
-at_fn_check_prepare_notrace 'an embedded newline' "read_sanitize.at:107"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:126"
 ( $at_check_trace; fig2dev -L pict2e <<EOF
 #FIG 3.2
 Landscape
@@ -2584,7 +3089,7 @@ A single point with a backward arrow - remove the arrow.
 " | \
   $at_diff - "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/read_sanitize.at:107"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:126"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2592,13 +3097,1237 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_10
-#AT_START_11
-at_fn_group_banner 11 'pict2e.at:42' \
-  "ignore -G option" "                               " 2
+#AT_STOP_21
+#AT_START_22
+at_fn_group_banner 22 'read.at:138' \
+  "reject negative font type" "                      " 5
 at_xfail=no
 (
-  $as_echo "11. $at_setup_line: testing $at_desc ..."
+  $as_echo "22. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:140: fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+4 0 0 1 0 -99999 12 0 4 135 360 0 0 A\\001
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:140"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+4 0 0 1 0 -99999 12 0 4 135 360 0 0 A\001
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Invalid text object at line 10.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:140"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_22
+#AT_START_23
+at_fn_group_banner 23 'read.at:148' \
+  "allow negative circle or ellipse radii" "         " 5
+at_xfail=no
+(
+  $as_echo "23. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:150: fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+1 2 0 1 0 7 50 -1 -1 0.0 1 0.0 0 0 -1200 -600 -1200 600 1200 -600
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:150"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+1 2 0 1 0 7 50 -1 -1 0.0 1 0.0 0 0 -1200 -600 -1200 600 1200 -600
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:150"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_23
+#AT_START_24
+at_fn_group_banner 24 'read.at:157' \
+  "survive debian bugs #881143, #881144" "           " 5
+at_xfail=no
+(
+  $as_echo "24. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:159: fig2dev -L pic <<EOF
+
+22-222
+
+4
+0+4 71111111iNf7-3  3 3 0ítyn
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:159"
+( $at_check_trace; fig2dev -L pic <<EOF
+
+22-222
+
+4
+0+4 71111111iNf7-3  3 3 0ítyn
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Invalid text object.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:159"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+{ set +x
+$as_echo "$at_srcdir/read.at:168: fig2dev -L tikz <<EOF
+
+ 1  1
+
+1
+
+11 4-51
+
+11 0 5
+1
+91
+1
+c!!!!
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:168"
+( $at_check_trace; fig2dev -L tikz <<EOF
+
+ 1  1
+
+1
+
+11 4-51
+
+11 0 5
+1
+91
+1
+c!!!!
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Invalid text object.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:168"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_24
+#AT_START_25
+at_fn_group_banner 25 'read.at:186' \
+  "reject out-of-range pattern, debian bug #881396" "" 5
+at_xfail=no
+(
+  $as_echo "25. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:188: fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+3 0 0 0 0 0 0 0 123456789 0 0-0-0 00
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:188"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+3 0 0 0 0 0 0 0 123456789 0 0-0-0 00
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Invalid spline object at line 10.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:188"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_25
+#AT_START_26
+at_fn_group_banner 26 'read.at:196' \
+  "survive debian bug #890016" "                     " 5
+at_xfail=no
+(
+  $as_echo "26. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:198: fig2dev -L box <<EOF
+711111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+
+
+0
+1
+16 3
+
+16 6
+
+0
+
+16 6
+
+0
+1
+1 6
+1=6
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:198"
+( $at_check_trace; fig2dev -L box <<EOF
+711111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+
+
+0
+1
+16 3
+
+16 6
+
+0
+
+16 6
+
+0
+1
+1 6
+1=6
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:198"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_26
+#AT_START_27
+at_fn_group_banner 27 'read.at:220' \
+  "ignore too many comment lines, ticket #25" "      " 5
+at_xfail=no
+(
+  $as_echo "27. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:222: fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.
+Single
+-2
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+1200 2
+2 1 0 1 -1 -1 50 -1 -1 0.0 0 0 -1 0 0 2
+        0 0 100 100
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:222"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.
+Single
+-2
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+1200 2
+2 1 0 1 -1 -1 50 -1 -1 0.0 0 0 -1 0 0 2
+        0 0 100 100
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:222"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_27
+#AT_START_28
+at_fn_group_banner 28 'read.at:240' \
+  "correctly free invalid line object, ticket #26" " " 5
+at_xfail=no
+(
+  $as_echo "28. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:242: fig2dev -L box <<EOF
+
+22233333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333322213222
+22222
+2
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:242"
+( $at_check_trace; fig2dev -L box <<EOF
+
+22233333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333322213222
+22222
+2
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:242"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_28
+#AT_START_29
+at_fn_group_banner 29 'read.at:251' \
+  "correctly free invalid spline, ticket #27" "      " 5
+at_xfail=no
+(
+  $as_echo "29. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:253: fig2dev -L box <<EOF
+#FIG 2
+1200 2
+3 0 0 0 0 0 0 0 0. 0 1
+0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:253"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 2
+1200 2
+3 0 0 0 0 0 0 0 0. 0 1
+0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Incomplete spline object at line 3.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:253"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_29
+#AT_START_30
+at_fn_group_banner 30 'read.at:263' \
+  "allow last line without newline, ticket #28" "    " 5
+at_xfail=no
+(
+  $as_echo "30. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:265: \$as_echo_n '#FIG 2
+0' | fig2dev -L box"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:265"
+( $at_check_trace; $as_echo_n '#FIG 2
+0' | fig2dev -L box
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Incomplete resolution information at line 1.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:265"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_30
+#AT_START_31
+at_fn_group_banner 31 'read.at:271' \
+  "correctly free invalid line object" "             " 5
+at_xfail=no
+(
+  $as_echo "31. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:273: fig2dev -L box <<EOF
+#FIG 2
+1200 2
+2 1 1 1 -1 50 0 0 0. 0 0
+0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:273"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 2
+1200 2
+2 1 1 1 -1 50 0 0 0. 0 0
+0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Incomplete line object at line 3.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:273"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_31
+#AT_START_32
+at_fn_group_banner 32 'read.at:283' \
+  "correctly free invalid line with picture" "       " 5
+at_xfail=no
+(
+  $as_echo "32. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:285: fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 5 0 1 0 -1 50 0 0 0. 0 0 0 0 0 5
+0 img
+0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:285"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 5 0 1 0 -1 50 0 0 0. 0 0 0 0 0 5
+0 img
+0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Incomplete line object at line 12.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:285"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_32
+#AT_START_33
+at_fn_group_banner 33 'read.at:295' \
+  "ignore splines with one point, ticket #29" "      " 5
+at_xfail=no
+(
+  $as_echo "33. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:297: fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+3 2 0 0 0 0 50 0 0 0. 0 0 0 0
+0 0 0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:297"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+3 2 0 0 0 0 50 0 0 0. 0 0 0 0
+0 0 0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Incomplete spline object at line 11.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:297"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_33
+#AT_START_34
+at_fn_group_banner 34 'read.at:306' \
+  "ignore splines with one point in format 1.3" "    " 5
+at_xfail=no
+(
+  $as_echo "34. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:308: fig2dev -L box <<EOF
+1200 2 9 9
+3 10 0 1 1 0 0 0 0 0 0
+9999 0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:308"
+( $at_check_trace; fig2dev -L box <<EOF
+1200 2 9 9
+3 10 0 1 1 0 0 0 0 0 0
+9999 0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "spline with a single point
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 1 $at_status "$at_srcdir/read.at:308"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_34
+#AT_START_35
+at_fn_group_banner 35 'read.at:317' \
+  "set invalid color number to default, ticket #30" "" 5
+at_xfail=no
+(
+  $as_echo "35. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:319: fig2dev -L pict2e <<EOF
+#FIG 2
+1200 2
+2 1 1 1 -502350 50 0 0 0. 0 0
+0 0 100 100 9999 0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:319"
+( $at_check_trace; fig2dev -L pict2e <<EOF
+#FIG 2
+1200 2
+2 1 1 1 -502350 50 0 0 0. 0 0
+0 0 100 100 9999 0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Invalid color number -502350 at line 2, using default color.
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:319"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_35
+#AT_START_36
+at_fn_group_banner 36 'read.at:329' \
+  "set ppi when reading fig files format 1.3" "      " 5
+at_xfail=no
+(
+  $as_echo "36. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:331: fig2dev -L dxf <<EOF
+1200 2 9 9
+3 10 0 1 1 0 0 0 0 0 0
+100 100 200 0 9999 0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:331"
+( $at_check_trace; fig2dev -L dxf <<EOF
+1200 2 9 9
+3 10 0 1 1 0 0 0 0 0 0
+100 100 200 0 9999 0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:331"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_36
+#AT_START_37
+at_fn_group_banner 37 'read.at:339' \
+  "process circle arrow at mag > 42, ticket #52" "   " 5
+at_xfail=no
+(
+  $as_echo "37. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+# With the -fsanitize=address option, a magnification >= 42 triggers an error.
+# Without the -fsanitize=address option, a segfault only results
+# if the array is accessed far enough from its valid range;
+# Use a magnification of 420.
+{ set +x
+$as_echo "$at_srcdir/read.at:345: fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+42000.0
+Single
+-2
+1200 2
+2 1 0 1 0 7 50 -1 -1 0.0 0 0 -1 1 0 2
+	5 0 1.0 60.0 120.0
+	 0 0 600 0
+EOF
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:345"
+( $at_check_trace; fig2dev -L box <<EOF
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+42000.0
+Single
+-2
+1200 2
+2 1 0 1 0 7 50 -1 -1 0.0 0 0 -1 1 0 2
+	5 0 1.0 60.0 120.0
+	 0 0 600 0
+EOF
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:345"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_37
+#AT_START_38
+at_fn_group_banner 38 'read.at:364' \
+  "prepend fig file path to picture file name" "     " 6
+at_xfail=no
+(
+  $as_echo "38. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/read.at:366: fig2dev -L eps \$srcdir/data/boxwimg.fig | \\
+	\$FGREP \"% Begin Imported EPS File: \$srcdir/data/line.eps\"
+"
+at_fn_check_prepare_notrace 'an embedded newline' "read.at:366"
+( $at_check_trace; fig2dev -L eps $srcdir/data/boxwimg.fig | \
+	$FGREP "% Begin Imported EPS File: $srcdir/data/line.eps"
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/read.at:366"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_38
+#AT_START_39
+at_fn_group_banner 39 'output.at:24' \
+  "compare arrow tips with template" "               " 7
+at_xfail=no
+(
+  $as_echo "39. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+# Skip this test, if the necessary programs are not found
+$as_echo "output.at:28" >"$at_check_line_file"
+(! $GSEXE --version || ! pnmarith -version || ! ppmhist -version) \
+  && at_fn_check_skip 77 "$at_srcdir/output.at:28"
+
+# The original must be saved as eps, not converted to pdf.
+# Conversion to pdf introduces a few pixel errors.
+$GSEXE -sDEVICE=pgmraw -dEPSCrop -r1200 -dNOPAUSE -dBATCH -dQUIET \
+	-sOutputFile=a.pgm $srcdir/data/arrows.eps
+
+fig2dev -L eps $srcdir/data/arrows.fig | \
+	$GSEXE -sDEVICE=pgmraw -dEPSCrop -r1200 -dNOPAUSE -dBATCH -dQUIET \
+	   -sOutputFile=b.pgm -
+
+# Was pamsumm -sum -brief, to expect 0\n on stdout - but pamsumm does not
+# exist on Debian stretch, so use ppmhist -noheader
+{ set +x
+$as_echo "$at_srcdir/output.at:41: pnmarith -difference a.pgm b.pgm | ppmhist -noheader | tr -d ' \\t'"
+at_fn_check_prepare_notrace 'a shell pipeline' "output.at:41"
+( $at_check_trace; pnmarith -difference a.pgm b.pgm | ppmhist -noheader | tr -d ' \t'
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo stderr:; cat "$at_stderr"
+echo >>"$at_stdout"; $as_echo "000026673361
+" | \
+  $at_diff - "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:41"
+if $at_failed; then :
+  pnmarith -difference a.pgm b.pgm >diff.pgm
+mv a.pgm orig.pgm; mv b.pgm current.pgm
+fi
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+
+
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_39
+#AT_START_40
+at_fn_group_banner 40 'output.at:50' \
+  "do not clip 0-width objects having arrows, #53" " " 7
+at_xfail=no
+(
+  $as_echo "40. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+# The lines of objects which have a line thickness of zero and which
+# have arrow heads do not need to be clipped.
+$as_echo "output.at:54" >"$at_check_line_file"
+(! $GSEXE --version || ! pnmarith -version || ! ppmhist -version) \
+  && at_fn_check_skip 77 "$at_srcdir/output.at:54"
+cat >clip0.fig <<'_ATEOF'
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 2 0 0 0 7 60 -1 20 0.000 0 0 -1 0 0 5
+	 0 -300 0 300 450 300 450 -300 0 -300
+2 1 0 0 0 0 50 -1 20 0.000 0 0 -1 1 1 4
+	0 0 1.00 60.00 120.00
+	0 0 1.00 60.00 120.00
+	 0 0 0 -300 150 -300 150 0
+2 1 0 0 0 0 50 -1 20 0.000 0 0 -1 1 1 4
+	13 0 1.00 60.00 120.00
+	13 0 1.00 60.00 120.00
+	 150 0 150 -300 300 -300 300 0
+2 1 0 0 0 0 50 -1 20 0.000 0 0 -1 1 1 4
+	13 1 1.0 60.0 120.0
+	13 1 1.0 60.0 120.0
+	 300 0 300 -300 450 -300 450 0
+2 1 0 0 0 0 50 -1 20 0.0 0 0 -1 1 1 4
+	14 0 1.0 60.00 120.00
+	14 0 1.0 60.00 120.00
+	 0 300 0 0 150 0 150 300
+2 1 0 0 0 0 50 -1 20 0.0 0 0 -1 1 1 4
+	14 1 1.00 60.00 120.00
+	14 1 1.00 60.00 120.00
+	 150 300 150 0 300 0 300 300
+2 2 0 0 0 0 50 -1 20 0.0 0 0 -1 0 0 5
+	 300 0 300 300 450 300 450 0 300 0
+_ATEOF
+
+{ set +x
+$as_echo "$at_srcdir/output.at:88: fig2dev -L eps -B '0.325 0.45 0.025 0.025' clip0.fig | \\
+	\$GSEXE -sDEVICE=pbmraw -dEPSCrop -r80 -dNOPAUSE -dBATCH -dQUIET \\
+	-sOutputFile=- - | ppmhist -noheader | tr -d ' \\t'"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:88"
+( $at_check_trace; fig2dev -L eps -B '0.325 0.45 0.025 0.025' clip0.fig | \
+	$GSEXE -sDEVICE=pbmraw -dEPSCrop -r80 -dNOPAUSE -dBATCH -dQUIET \
+	-sOutputFile=- - | ppmhist -noheader | tr -d ' \t'
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo >>"$at_stdout"; $as_echo "00001064
+" | \
+  $at_diff - "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:88"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_40
+#AT_START_41
+at_fn_group_banner 41 'output.at:94' \
+  "honor SOURCE_DATE_EPOCH environment variable" "   " 7
+at_xfail=no
+(
+  $as_echo "41. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/output.at:96: SOURCE_DATE_EPOCH=123456789 fig2dev -L eps \$srcdir/data/line.fig | \\
+	\$FGREP 'CreationDate'"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:96"
+( $at_check_trace; SOURCE_DATE_EPOCH=123456789 fig2dev -L eps $srcdir/data/line.fig | \
+	$FGREP 'CreationDate'
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo >>"$at_stdout"; $as_echo "%%CreationDate: 1973-11-29 21:33:09
+" | \
+  $at_diff - "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:96"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_41
+#AT_START_42
+at_fn_group_banner 42 'output.at:101' \
+  "fail on text in SOURCE_DATE_EPOCH" "              " 7
+at_xfail=no
+(
+  $as_echo "42. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+{ set +x
+$as_echo "$at_srcdir/output.at:103: SOURCE_DATE_EPOCH=7here fig2dev -L eps \$srcdir/data/line.fig
+"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:103"
+( $at_check_trace; SOURCE_DATE_EPOCH=7here fig2dev -L eps $srcdir/data/line.fig
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+echo >>"$at_stderr"; $as_echo "Environment variable \$SOURCE_DATE_EPOCH: Trailing garbage: here
+" | \
+  $at_diff - "$at_stderr" || at_failed=:
+
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:103"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_42
+#AT_START_43
+at_fn_group_banner 43 'output.at:151' \
+  "ignore -G option" "                               " 8
+at_xfail=no
+(
+  $as_echo "43. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
@@ -2617,9 +4346,9 @@ Single
 _ATEOF
 
 { set +x
-$as_echo "$at_srcdir/pict2e.at:48: fig2dev -L pict2e -G0.2:1cm default.fig
+$as_echo "$at_srcdir/output.at:157: fig2dev -L pict2e -G0.2:1cm default.fig
 "
-at_fn_check_prepare_notrace 'an embedded newline' "pict2e.at:48"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:157"
 ( $at_check_trace; fig2dev -L pict2e -G0.2:1cm default.fig
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
@@ -2627,7 +4356,7 @@ at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 
-at_fn_check_status 0 $at_status "$at_srcdir/pict2e.at:48"
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:157"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2635,38 +4364,156 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_11
-#AT_START_12
-at_fn_group_banner 12 'tikz.at:2' \
-  "conditionally allocate \\XFigu" "                  " 3
+#AT_STOP_43
+#AT_START_44
+at_fn_group_banner 44 'output.at:161' \
+  "accept large coordinates" "                       " 8
 at_xfail=no
 (
-  $as_echo "12. $at_setup_line: testing $at_desc ..."
+  $as_echo "44. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "output.at:163" >"$at_check_line_file"
+(! latex --version) \
+  && at_fn_check_skip 77 "$at_srcdir/output.at:163"
+cat >big1.fig <<'_ATEOF'
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 1 0 8 0 7 50 -1 -1 0.0 0 0 -1 0 0 2
+-18000 0 0 -18000
+_ATEOF
+
+cat >big2.fig <<'_ATEOF'
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 1 0 8 0 7 50 -1 -1 0.0 0 0 -1 0 0 2
+0 18000 18000 0
+_ATEOF
+
+{ set +x
+$as_echo "$at_srcdir/output.at:172: fig2dev -L pict2e -P big1.fig big1.tex && \\
+	fig2dev -L pict2e -P big2.fig big2.tex && \\
+	latex -halt-on-error big1.tex && latex -halt-on-error big2.tex
+"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:172"
+( $at_check_trace; fig2dev -L pict2e -P big1.fig big1.tex && \
+	fig2dev -L pict2e -P big2.fig big2.tex && \
+	latex -halt-on-error big1.tex && latex -halt-on-error big2.tex
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:172"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_44
+#AT_START_45
+at_fn_group_banner 45 'output.at:180' \
+  "compare patterns with template" "                 " 9
+at_xfail=no
+(
+  $as_echo "45. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
 
-cat >tex.tex <<'_ATEOF'
-\input tikz
-\input line.tikz\immediate\write16{\meaning\XFigu}
-\input line.tikz\immediate\write16{\meaning\XFigu}\bye
-_ATEOF
+{ set +x
+$as_echo "$at_srcdir/output.at:183: SOURCE_DATE_EPOCH=1483528980 fig2dev -L svg \\
+	\$srcdir/data/patterns.fig | diff - \$builddir/data/patterns.svg"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:183"
+( $at_check_trace; SOURCE_DATE_EPOCH=1483528980 fig2dev -L svg \
+	$srcdir/data/patterns.fig | diff - $builddir/data/patterns.svg
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:183"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+# Bitwise comparison failed because of the unreliable rendering provided
+# by, e.g., convert. Commented out.
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_45
+#AT_START_46
+at_fn_group_banner 46 'output.at:213' \
+  "compare fills with arrows to template" "          " 9
+at_xfail=no
+(
+  $as_echo "46. $at_setup_line: testing $at_desc ..."
+  $at_traceon
 
 
+{ set +x
+$as_echo "$at_srcdir/output.at:215: SOURCE_DATE_EPOCH=1483564881 fig2dev -L svg \\
+	\$srcdir/data/fillswclip.fig | diff - \$builddir/data/fillswclip.svg"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:215"
+( $at_check_trace; SOURCE_DATE_EPOCH=1483564881 fig2dev -L svg \
+	$srcdir/data/fillswclip.fig | diff - $builddir/data/fillswclip.svg
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:215"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_46
+#AT_START_47
+at_fn_group_banner 47 'output.at:222' \
+  "conditionally allocate \\XFigu" "                  " 10
+at_xfail=no
+(
+  $as_echo "47. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "output.at:224" >"$at_check_line_file"
+(! latex --version) \
+  && at_fn_check_skip 77 "$at_srcdir/output.at:224"
 cat >latex.tex <<'_ATEOF'
 \documentclass{minimal}\usepackage{tikz}\begin{document}
 \input line.tikz\immediate\write16{\meaning\XFigu}
 \input line.tikz\immediate\write16{\meaning\XFigu}\end{document}
 _ATEOF
 
-
 fig2dev -L tikz $srcdir/data/line.fig line.tikz
-
 { set +x
-$as_echo "$at_srcdir/tikz.at:18: tex tex.tex | \$FGREP dimen | uniq | wc -l
+$as_echo "$at_srcdir/output.at:231: latex latex.tex | \$FGREP dimen | uniq | wc -l | tr -d ' \\t'
 "
-at_fn_check_prepare_notrace 'an embedded newline' "tikz.at:18"
-( $at_check_trace; tex tex.tex | $FGREP dimen | uniq | wc -l
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:231"
+( $at_check_trace; latex latex.tex | $FGREP dimen | uniq | wc -l | tr -d ' \t'
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -2675,42 +4522,22 @@ $at_check_filter
 echo >>"$at_stdout"; $as_echo "1
 " | \
   $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/tikz.at:18"
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:231"
 $at_failed && at_fn_log_failure
 $at_traceon; }
-
-
-{ set +x
-$as_echo "$at_srcdir/tikz.at:22: latex latex.tex | \$FGREP dimen | uniq | wc -l
-"
-at_fn_check_prepare_notrace 'an embedded newline' "tikz.at:22"
-( $at_check_trace; latex latex.tex | $FGREP dimen | uniq | wc -l
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-
-echo >>"$at_stdout"; $as_echo "1
-" | \
-  $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/tikz.at:22"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_12
-#AT_START_13
-at_fn_group_banner 13 'tikz.at:28' \
-  "pattern with stroke color equal to fill color" "  " 3
+#AT_STOP_47
+#AT_START_48
+at_fn_group_banner 48 'output.at:236' \
+  "pattern with stroke color equal to fill color" "  " 10
 at_xfail=no
 (
-  $as_echo "13. $at_setup_line: testing $at_desc ..."
+  $as_echo "48. $at_setup_line: testing $at_desc ..."
   $at_traceon
-
 
 
 cat >box.fig <<'_ATEOF'
@@ -2727,12 +4554,11 @@ Single
 	 0 0 600 0 600 600 0 600
 _ATEOF
 
-
 { set +x
-$as_echo "$at_srcdir/tikz.at:37: fig2dev -L tikz -P box.fig | \$FGREP '\\pgfsetfillpattern{xfigp8}{blue}
+$as_echo "$at_srcdir/output.at:243: fig2dev -L tikz -P box.fig | \$FGREP '\\pgfsetfillpattern{xfigp8}{blue}
 \\pattern'
 "
-at_fn_check_prepare_notrace 'an embedded newline' "tikz.at:37"
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:243"
 ( $at_check_trace; fig2dev -L tikz -P box.fig | $FGREP '\pgfsetfillpattern{xfigp8}{blue}
 \pattern'
 
@@ -2741,253 +4567,7 @@ at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/tikz.at:37"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_13
-#AT_START_14
-at_fn_group_banner 14 'svg.at:2' \
-  "compare patterns with template" "                 " 4
-at_xfail=no
-(
-  $as_echo "14. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-
-
-{ set +x
-$as_echo "$at_srcdir/svg.at:7: SOURCE_DATE_EPOCH=1483528980 fig2dev -L svg \$srcdir/data/patterns.fig | \\
-	diff -q - \$srcdir/data/patterns.svg"
-at_fn_check_prepare_notrace 'an embedded newline' "svg.at:7"
-( $at_check_trace; SOURCE_DATE_EPOCH=1483528980 fig2dev -L svg $srcdir/data/patterns.fig | \
-	diff -q - $srcdir/data/patterns.svg
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/svg.at:7"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-# Bitwise comparison failed because of the unreliable rendering provided
-# by, e.g., convert. Commented out.
-if false; then :
-
-# Skip this test, if the necessary programs are not found
-$as_echo "svg.at:12" >"$at_check_line_file"
-(! gs --version || ! pnmarith --version || ! ppmhist --version) \
-  && at_fn_check_skip 77 "$at_srcdir/svg.at:12"
-
-convert -density 1200 $srcdir/data/patterns.svg a.pbm
-
-# It makes a difference, whether  convert... svg:-  or  convert... -  is used.
-fig2dev -L svg $srcdir/data/patterns.fig | convert -density 1200 - b.pbm
-
-# Was pamsumm -sum -brief, to expect 0\n on stdout - but pamsumm does not
-# exist on Debian stretch, so use ppmhist -noheader
-{ set +x
-$as_echo "$at_srcdir/svg.at:12: pnmarith -difference a.pbm b.pbm | ppmhist -noheader | tr -d ' 	'"
-at_fn_check_prepare_notrace 'a shell pipeline' "svg.at:12"
-( $at_check_trace; pnmarith -difference a.pbm b.pbm | ppmhist -noheader | tr -d ' 	'
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo stderr:; cat "$at_stderr"
-echo >>"$at_stdout"; $as_echo "00008207389
-" | \
-  $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/svg.at:12"
-if $at_failed; then :
-  pnmtopng -compression=9 -comp_mem_level=9 a.pbm > orig.png
-pnmtopng -compression=9 -comp_mem_level=9 b.pbm > current.png
-pnmarith -difference a.pbm b.pbm | pnmtopng -compression=9 -comp_mem_level=9 > diff.png
-rm a.pbm b.pbm
-
-fi
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-
-
-
-
-
-fi
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_14
-#AT_START_15
-at_fn_group_banner 15 'svg.at:40' \
-  "compare fills with arrows to template" "          " 4
-at_xfail=no
-(
-  $as_echo "15. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-{ set +x
-$as_echo "$at_srcdir/svg.at:42: SOURCE_DATE_EPOCH=1483564881 fig2dev -L svg \$srcdir/data/fillswclip.fig | \\
-	diff -q - \$srcdir/data/fillswclip.svg"
-at_fn_check_prepare_notrace 'an embedded newline' "svg.at:42"
-( $at_check_trace; SOURCE_DATE_EPOCH=1483564881 fig2dev -L svg $srcdir/data/fillswclip.fig | \
-	diff -q - $srcdir/data/fillswclip.svg
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-at_fn_diff_devnull "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/svg.at:42"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_15
-#AT_START_16
-at_fn_group_banner 16 'arrows_eps.at:2' \
-  "compare arrow tips with template" "               " 5
-at_xfail=no
-(
-  $as_echo "16. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-
-# Skip this test, if the necessary programs are not found
-$as_echo "arrows_eps.at:7" >"$at_check_line_file"
-(! gs --version) \
-  && at_fn_check_skip 77 "$at_srcdir/arrows_eps.at:7"
-$as_echo "arrows_eps.at:8" >"$at_check_line_file"
-(! pnmarith --version) \
-  && at_fn_check_skip 77 "$at_srcdir/arrows_eps.at:8"
-$as_echo "arrows_eps.at:9" >"$at_check_line_file"
-(! ppmhist --version) \
-  && at_fn_check_skip 77 "$at_srcdir/arrows_eps.at:9"
-
-# The original must be saved as eps, not converted to pdf.
-# Conversion to pdf introduces a few pixel errors.
-gs -sDEVICE=pgmraw -dEPSCrop -r1200 -dNOPAUSE -dBATCH -dQUIET \
-	-sOutputFile=a.pgm $srcdir/data/arrows.eps
-
-fig2dev -L eps $srcdir/data/arrows.fig | \
-	gs -sDEVICE=pgmraw -dEPSCrop -r1200 -dNOPAUSE -dBATCH -dQUIET \
-	   -sOutputFile=b.pgm -
-
-# Was pamsumm -sum -brief, to expect 0\n on stdout - but pamsumm does not
-# exist on Debian stretch, so use ppmhist -noheader
-{ set +x
-$as_echo "$at_srcdir/arrows_eps.at:22: pnmarith -difference a.pgm b.pgm | ppmhist -noheader | tr -d ' 	'"
-at_fn_check_prepare_notrace 'a shell pipeline' "arrows_eps.at:22"
-( $at_check_trace; pnmarith -difference a.pgm b.pgm | ppmhist -noheader | tr -d ' 	'
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo stderr:; cat "$at_stderr"
-echo >>"$at_stdout"; $as_echo "000026673361
-" | \
-  $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/arrows_eps.at:22"
-if $at_failed; then :
-  pnmtopng -compression=9 -comp_mem_level=9 a.pgm > orig.png
-pnmtopng -compression=9 -comp_mem_level=9 b.pgm > current.png
-pnmarith -difference a.pgm b.pgm | pnmtopng -compression=9 -comp_mem_level=9 > diff.png
-rm a.pgm b.pgm
-
-fi
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-
-
-
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_16
-#AT_START_17
-at_fn_group_banner 17 'lookup_X_color.at:3' \
-  "accept correct hexadecimal rgb-values" "          " 6
-at_xfail=no
-(
-  $as_echo "17. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-{ set +x
-$as_echo "$at_srcdir/lookup_X_color.at:5: fig2dev -Leps -g'#1e9' \$srcdir/data/line.fig
-"
-at_fn_check_prepare_notrace 'an embedded newline' "lookup_X_color.at:5"
-( $at_check_trace; fig2dev -Leps -g'#1e9' $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/lookup_X_color.at:5"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-$as_echo "$at_srcdir/lookup_X_color.at:7: fig2dev -Leps -g'#11e090' \$srcdir/data/line.fig
-"
-at_fn_check_prepare_notrace 'an embedded newline' "lookup_X_color.at:7"
-( $at_check_trace; fig2dev -Leps -g'#11e090' $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/lookup_X_color.at:7"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-$as_echo "$at_srcdir/lookup_X_color.at:9: fig2dev -Leps -g'#114ea090c' \$srcdir/data/line.fig
-"
-at_fn_check_prepare_notrace 'an embedded newline' "lookup_X_color.at:9"
-( $at_check_trace; fig2dev -Leps -g'#114ea090c' $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/lookup_X_color.at:9"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-$as_echo "$at_srcdir/lookup_X_color.at:11: fig2dev -Leps -g'#1144ea0f90c0' \$srcdir/data/line.fig
-"
-at_fn_check_prepare_notrace 'an embedded newline' "lookup_X_color.at:11"
-( $at_check_trace; fig2dev -Leps -g'#1144ea0f90c0' $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/lookup_X_color.at:11"
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:243"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
@@ -2995,364 +4575,226 @@ $at_traceon; }
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_17
-#AT_START_18
-at_fn_group_banner 18 'lookup_X_color.at:15' \
-  "fail on malformed hexadecimal rgb-values" "       " 6
+#AT_STOP_48
+#AT_START_49
+at_fn_group_banner 49 'output.at:248' \
+  "accept large coordinates" "                       " 10
 at_xfail=no
 (
-  $as_echo "18. $at_setup_line: testing $at_desc ..."
+  $as_echo "49. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
+$as_echo "output.at:250" >"$at_check_line_file"
+(! latex --version) \
+  && at_fn_check_skip 77 "$at_srcdir/output.at:250"
+cat >big1.fig <<'_ATEOF'
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 1 0 8 0 7 50 -1 -1 0.0 0 0 -1 0 0 2
+-18000 0 0 -18000
+_ATEOF
+
+cat >big2.fig <<'_ATEOF'
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 1 0 8 0 7 50 -1 -1 0.0 0 0 -1 0 0 2
+0 18000 18000 0
+_ATEOF
+
 { set +x
-$as_echo "$at_srcdir/lookup_X_color.at:17: fig2dev -Leps -g'#144ea0f90c0' \$srcdir/data/line.fig
+$as_echo "$at_srcdir/output.at:259: fig2dev -L tikz -P big1.fig big1.tex && \\
+	fig2dev -L tikz -P big2.fig big2.tex && \\
+	latex -halt-on-error big1.tex && latex -halt-on-error big2.tex
 "
-at_fn_check_prepare_notrace 'an embedded newline' "lookup_X_color.at:17"
-( $at_check_trace; fig2dev -Leps -g'#144ea0f90c0' $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo >>"$at_stderr"; $as_echo "Can't parse color '#144ea0f90c0', ignoring background option
-" | \
-  $at_diff - "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/lookup_X_color.at:17"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-{ set +x
-$as_echo "$at_srcdir/lookup_X_color.at:21: fig2dev -Leps -g'#30g' \$srcdir/data/line.fig
-"
-at_fn_check_prepare_notrace 'an embedded newline' "lookup_X_color.at:21"
-( $at_check_trace; fig2dev -Leps -g'#30g' $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo >>"$at_stderr"; $as_echo "Can't parse color '#30g', ignoring background option
-" | \
-  $at_diff - "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/lookup_X_color.at:21"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_18
-#AT_START_19
-at_fn_group_banner 19 'lookup_X_color.at:26' \
-  "read color database .../rgb.txt" "                " 6
-at_xfail=no
-(
-  $as_echo "19. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-$as_echo "lookup_X_color.at:28" >"$at_check_line_file"
-(test "x$INSTALLCHECK" = xno) \
-  && at_fn_check_skip 77 "$at_srcdir/lookup_X_color.at:28"
-{ set +x
-$as_echo "$at_srcdir/lookup_X_color.at:29: fig2dev -Leps -g'mistyrose' \$srcdir/data/line.fig
-"
-at_fn_check_prepare_notrace 'an embedded newline' "lookup_X_color.at:29"
-( $at_check_trace; fig2dev -Leps -g'mistyrose' $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/lookup_X_color.at:29"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_19
-#AT_START_20
-at_fn_group_banner 20 'creationdate.at:3' \
-  "honor SOURCE_DATE_EPOCH environment variable" "   " 7
-at_xfail=no
-(
-  $as_echo "20. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-{ set +x
-$as_echo "$at_srcdir/creationdate.at:5: SOURCE_DATE_EPOCH=123456789 fig2dev -L eps \$srcdir/data/line.fig | \\
-	\$FGREP 'CreationDate'"
-at_fn_check_prepare_notrace 'an embedded newline' "creationdate.at:5"
-( $at_check_trace; SOURCE_DATE_EPOCH=123456789 fig2dev -L eps $srcdir/data/line.fig | \
-	$FGREP 'CreationDate'
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo >>"$at_stdout"; $as_echo "%%CreationDate: 1973-11-29 21:33:09
-" | \
-  $at_diff - "$at_stdout" || at_failed=:
-at_fn_check_status 0 $at_status "$at_srcdir/creationdate.at:5"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_20
-#AT_START_21
-at_fn_group_banner 21 'creationdate.at:10' \
-  "fail on text in SOURCE_DATE_EPOCH" "              " 7
-at_xfail=no
-(
-  $as_echo "21. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-{ set +x
-$as_echo "$at_srcdir/creationdate.at:12: SOURCE_DATE_EPOCH=7here fig2dev -L eps \$srcdir/data/line.fig
-"
-at_fn_check_prepare_notrace 'an embedded newline' "creationdate.at:12"
-( $at_check_trace; SOURCE_DATE_EPOCH=7here fig2dev -L eps $srcdir/data/line.fig
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-echo >>"$at_stderr"; $as_echo "Environment variable \$SOURCE_DATE_EPOCH: Trailing garbage: here
-" | \
-  $at_diff - "$at_stderr" || at_failed=:
-
-at_fn_check_status 0 $at_status "$at_srcdir/creationdate.at:12"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_21
-#AT_START_22
-at_fn_group_banner 22 'bitmaps.at:3' \
-  "gif" "                                            " 8
-at_xfail=no
-(
-  $as_echo "22. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-
-{ set +x
-$as_echo "$at_srcdir/bitmaps.at:6: fig2dev -L gif \$srcdir/data/line.fig line.gif &&\\
-	sed '11 s/xpm/gif/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
-"
-at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:6"
-( $at_check_trace; fig2dev -L gif $srcdir/data/line.fig line.gif &&\
-	sed '11 s/xpm/gif/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+at_fn_check_prepare_notrace 'an embedded newline' "output.at:259"
+( $at_check_trace; fig2dev -L tikz -P big1.fig big1.tex && \
+	fig2dev -L tikz -P big2.fig big2.tex && \
+	latex -halt-on-error big1.tex && latex -halt-on-error big2.tex
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:6"
+at_fn_check_status 0 $at_status "$at_srcdir/output.at:259"
 $at_failed && at_fn_log_failure
 $at_traceon; }
-
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_22
-#AT_START_23
-at_fn_group_banner 23 'bitmaps.at:12' \
-  "jpeg" "                                           " 8
+#AT_STOP_49
+#AT_START_50
+at_fn_group_banner 50 'bitmaps.at:25' \
+  "gif" "                                            " 11
 at_xfail=no
 (
-  $as_echo "23. $at_setup_line: testing $at_desc ..."
+  $as_echo "50. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
-
+$as_echo "bitmaps.at:27" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmtogif -version || ! ppmquant -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:27"
 { set +x
-$as_echo "$at_srcdir/bitmaps.at:15: fig2dev -L jpeg \$srcdir/data/line.fig line.jpg &&\\
-	sed '11 s/xpm/jpg/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+$as_echo "$at_srcdir/bitmaps.at:28: fig2dev -L gif \$srcdir/data/line.fig line.gif && \\
+	\$SED '11 s/eps/gif/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
 "
-at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:15"
-( $at_check_trace; fig2dev -L jpeg $srcdir/data/line.fig line.jpg &&\
-	sed '11 s/xpm/jpg/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:28"
+( $at_check_trace; fig2dev -L gif $srcdir/data/line.fig line.gif && \
+	$SED '11 s/eps/gif/' $srcdir/data/boxwimg.fig | fig2dev -L eps
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:15"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:28"
 $at_failed && at_fn_log_failure
 $at_traceon; }
-
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_23
-#AT_START_24
-at_fn_group_banner 24 'bitmaps.at:21' \
-  "pcx" "                                            " 8
+#AT_STOP_50
+#AT_START_51
+at_fn_group_banner 51 'bitmaps.at:33' \
+  "jpeg" "                                           " 11
 at_xfail=no
 (
-  $as_echo "24. $at_setup_line: testing $at_desc ..."
+  $as_echo "51. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
-
+$as_echo "bitmaps.at:35" >"$at_check_line_file"
+(! $GSEXE --version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:35"
 { set +x
-$as_echo "$at_srcdir/bitmaps.at:24: fig2dev -L pcx \$srcdir/data/line.fig line.pcx &&\\
-	sed '11 s/xpm/pcx/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+$as_echo "$at_srcdir/bitmaps.at:36: fig2dev -L jpeg \$srcdir/data/line.fig line.jpg && \\
+	\$SED '11 s/eps/jpg/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
 "
-at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:24"
-( $at_check_trace; fig2dev -L pcx $srcdir/data/line.fig line.pcx &&\
-	sed '11 s/xpm/pcx/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:36"
+( $at_check_trace; fig2dev -L jpeg $srcdir/data/line.fig line.jpg && \
+	$SED '11 s/eps/jpg/' $srcdir/data/boxwimg.fig | fig2dev -L eps
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:24"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:36"
 $at_failed && at_fn_log_failure
 $at_traceon; }
-
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_24
-#AT_START_25
-at_fn_group_banner 25 'bitmaps.at:30' \
-  "png" "                                            " 8
+#AT_STOP_51
+#AT_START_52
+at_fn_group_banner 52 'bitmaps.at:41' \
+  "pcx" "                                            " 11
 at_xfail=no
 (
-  $as_echo "25. $at_setup_line: testing $at_desc ..."
+  $as_echo "52. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
-
+$as_echo "bitmaps.at:43" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmtopcx -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:43"
 { set +x
-$as_echo "$at_srcdir/bitmaps.at:33: fig2dev -L png \$srcdir/data/line.fig line.png &&\\
-	sed '11 s/xpm/png/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+$as_echo "$at_srcdir/bitmaps.at:44: fig2dev -L pcx \$srcdir/data/line.fig line.pcx && \\
+	\$SED '11 s/eps/pcx/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
 "
-at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:33"
-( $at_check_trace; fig2dev -L png $srcdir/data/line.fig line.png &&\
-	sed '11 s/xpm/png/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:44"
+( $at_check_trace; fig2dev -L pcx $srcdir/data/line.fig line.pcx && \
+	$SED '11 s/eps/pcx/' $srcdir/data/boxwimg.fig | fig2dev -L eps
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:33"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:44"
 $at_failed && at_fn_log_failure
 $at_traceon; }
-
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_25
-#AT_START_26
-at_fn_group_banner 26 'bitmaps.at:39' \
-  "ppm" "                                            " 8
+#AT_STOP_52
+#AT_START_53
+at_fn_group_banner 53 'bitmaps.at:49' \
+  "png" "                                            " 11
 at_xfail=no
 (
-  $as_echo "26. $at_setup_line: testing $at_desc ..."
+  $as_echo "53. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
-
+$as_echo "bitmaps.at:51" >"$at_check_line_file"
+(test -n "$WITH_PNG_TRUE" || ! $GSEXE --version || ! pnmtopng -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:51"
 { set +x
-$as_echo "$at_srcdir/bitmaps.at:42: fig2dev -L gif \$srcdir/data/line.fig line.gif &&\\
-	sed '11 s/xpm/gif/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+$as_echo "$at_srcdir/bitmaps.at:52: fig2dev -L png \$srcdir/data/line.fig line.png && \\
+	\$SED '11 s/eps/png/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
 "
-at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:42"
-( $at_check_trace; fig2dev -L gif $srcdir/data/line.fig line.gif &&\
-	sed '11 s/xpm/gif/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:52"
+( $at_check_trace; fig2dev -L png $srcdir/data/line.fig line.png && \
+	$SED '11 s/eps/png/' $srcdir/data/boxwimg.fig | fig2dev -L eps
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 at_fn_diff_devnull "$at_stderr" || at_failed=:
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:42"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:52"
 $at_failed && at_fn_log_failure
 $at_traceon; }
-
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_26
-#AT_START_27
-at_fn_group_banner 27 'bitmaps.at:48' \
-  "tiff" "                                           " 8
+#AT_STOP_53
+#AT_START_54
+at_fn_group_banner 54 'bitmaps.at:57' \
+  "png with smoothing" "                             " 11
 at_xfail=no
 (
-  $as_echo "27. $at_setup_line: testing $at_desc ..."
+  $as_echo "54. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
-
+$as_echo "bitmaps.at:59" >"$at_check_line_file"
+(test -n "$WITH_PNG_TRUE" || ! $GSEXE --version || ! pnmtopng -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:59"
 { set +x
-$as_echo "$at_srcdir/bitmaps.at:51: fig2dev -L tiff \$srcdir/data/line.fig line.tif &&\\
-	sed '11 s/xpm/tif/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
-"
-at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:51"
-( $at_check_trace; fig2dev -L tiff $srcdir/data/line.fig line.tif &&\
-	sed '11 s/xpm/tif/' $srcdir/data/boxwimg.fig | fig2dev -L eps
-
-) >>"$at_stdout" 2>>"$at_stderr" 5>&-
-at_status=$? at_failed=false
-$at_check_filter
-at_fn_diff_devnull "$at_stderr" || at_failed=:
-echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:51"
-$at_failed && at_fn_log_failure
-$at_traceon; }
-
-
-  set +x
-  $at_times_p && times >"$at_times_file"
-) 5>&1 2>&1 7>&- | eval $at_tee_pipe
-read at_status <"$at_status_file"
-#AT_STOP_27
-#AT_START_28
-at_fn_group_banner 28 'bitmaps.at:57' \
-  "xbm" "                                            " 8
-at_xfail=no
-(
-  $as_echo "28. $at_setup_line: testing $at_desc ..."
-  $at_traceon
-
-
-
-{ set +x
-$as_echo "$at_srcdir/bitmaps.at:60: fig2dev -L xbm \$srcdir/data/line.fig line.xbm &&\\
-	sed '11 s/xpm/xbm/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+$as_echo "$at_srcdir/bitmaps.at:60: fig2dev -L png -S 4 \$srcdir/data/line.fig line.png && \\
+	\$SED '11 s/eps/png/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
 "
 at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:60"
-( $at_check_trace; fig2dev -L xbm $srcdir/data/line.fig line.xbm &&\
-	sed '11 s/xpm/xbm/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+( $at_check_trace; fig2dev -L png -S 4 $srcdir/data/line.fig line.png && \
+	$SED '11 s/eps/png/' $srcdir/data/boxwimg.fig | fig2dev -L eps
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
@@ -3363,45 +4805,451 @@ at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:60"
 $at_failed && at_fn_log_failure
 $at_traceon; }
 
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_54
+#AT_START_55
+at_fn_group_banner 55 'bitmaps.at:65' \
+  "ppm" "                                            " 11
+at_xfail=no
+(
+  $as_echo "55. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "bitmaps.at:67" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmtopcx -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:67"
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:68: fig2dev -L ppm \$srcdir/data/line.fig line.ppm && \\
+	\$SED '11 s/eps/ppm/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:68"
+( $at_check_trace; fig2dev -L ppm $srcdir/data/line.fig line.ppm && \
+	$SED '11 s/eps/ppm/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:68"
+$at_failed && at_fn_log_failure
+$at_traceon; }
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_28
-#AT_START_29
-at_fn_group_banner 29 'bitmaps.at:66' \
-  "xpm" "                                            " 8
+#AT_STOP_55
+#AT_START_56
+at_fn_group_banner 56 'bitmaps.at:73' \
+  "tiff" "                                           " 11
 at_xfail=no
 (
-  $as_echo "29. $at_setup_line: testing $at_desc ..."
+  $as_echo "56. $at_setup_line: testing $at_desc ..."
   $at_traceon
 
 
-
-$as_echo "bitmaps.at:69" >"$at_check_line_file"
-(test "x$INSTALLCHECK" = xno) \
-  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:69"
+$as_echo "bitmaps.at:75" >"$at_check_line_file"
+(! $GSEXE --version || ! pnmtotiff -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:75"
 { set +x
-$as_echo "$at_srcdir/bitmaps.at:70: fig2dev -L xpm \$srcdir/data/line.fig line.xpm &&\\
-	fig2dev -L eps \$srcdir/data/boxwimg.fig
+$as_echo "$at_srcdir/bitmaps.at:76: fig2dev -L tiff \$srcdir/data/line.fig line.tif && \\
+	\$SED '11 s/eps/tif/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
 "
-at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:70"
-( $at_check_trace; fig2dev -L xpm $srcdir/data/line.fig line.xpm &&\
-	fig2dev -L eps $srcdir/data/boxwimg.fig
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:76"
+( $at_check_trace; fig2dev -L tiff $srcdir/data/line.fig line.tif && \
+	$SED '11 s/eps/tif/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:76"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_56
+#AT_START_57
+at_fn_group_banner 57 'bitmaps.at:81' \
+  "xbm" "                                            " 11
+at_xfail=no
+(
+  $as_echo "57. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+# pgmtopbm -version exits with error; Assume, it exists, if the
+# other netpbm programs are there.
+$as_echo "bitmaps.at:85" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmtopgm -version || ! pbmtoxbm -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:85"
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:86: fig2dev -L xbm \$srcdir/data/line.fig line.xbm && \\
+	\$SED '11 s/eps/xbm/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:86"
+( $at_check_trace; fig2dev -L xbm $srcdir/data/line.fig line.xbm && \
+	$SED '11 s/eps/xbm/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:86"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_57
+#AT_START_58
+at_fn_group_banner 58 'bitmaps.at:91' \
+  "xbm with smoothing" "                             " 11
+at_xfail=no
+(
+  $as_echo "58. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+# pgmtopbm -version exits with error; Assume, it exists, if the
+# other netpbm programs are there.
+$as_echo "bitmaps.at:95" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmtopgm -version || ! pbmtoxbm -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:95"
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:96: fig2dev -L xbm -S 4 \$srcdir/data/line.fig line.xbm && \\
+	\$SED '11 s/eps/xbm/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:96"
+( $at_check_trace; fig2dev -L xbm -S 4 $srcdir/data/line.fig line.xbm && \
+	$SED '11 s/eps/xbm/' $srcdir/data/boxwimg.fig | fig2dev -L eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:96"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_58
+#AT_START_59
+at_fn_group_banner 59 'bitmaps.at:101' \
+  "xpm" "                                            " 11
+at_xfail=no
+(
+  $as_echo "59. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+# Skip, if WITH_XPM_TRUE is set to '#'.
+$as_echo "bitmaps.at:104" >"$at_check_line_file"
+(test -n "$WITH_XPM_TRUE") \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:104"
+$as_echo "bitmaps.at:105" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmquant -version || ! ppmtoxpm -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:105"
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:106: fig2dev -L xpm \$srcdir/data/line.fig line.xpm && \\
+	\$SED '11 s/eps/xpm/' \$srcdir/data/boxwimg.fig | fig2dev -L eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:106"
+( $at_check_trace; fig2dev -L xpm $srcdir/data/line.fig line.xpm && \
+	$SED '11 s/eps/xpm/' $srcdir/data/boxwimg.fig | fig2dev -L eps
 
 ) >>"$at_stdout" 2>>"$at_stderr" 5>&-
 at_status=$? at_failed=false
 $at_check_filter
 echo stderr:; cat "$at_stderr"
 echo stdout:; cat "$at_stdout"
-at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:70"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:106"
 $at_failed && at_fn_log_failure
 $at_traceon; }
-
 
   set +x
   $at_times_p && times >"$at_times_file"
 ) 5>&1 2>&1 7>&- | eval $at_tee_pipe
 read at_status <"$at_status_file"
-#AT_STOP_29
+#AT_STOP_59
+#AT_START_60
+at_fn_group_banner 60 'bitmaps.at:115' \
+  "eps with acscii preview" "                        " 12
+at_xfail=no
+(
+  $as_echo "60. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "bitmaps.at:117" >"$at_check_line_file"
+(! $GSEXE --version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:117"
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:118: fig2dev -L eps -A \$srcdir/data/line.fig | \\
+	\$FGREP %%BeginPreview
+"
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:118"
+( $at_check_trace; fig2dev -L eps -A $srcdir/data/line.fig | \
+	$FGREP %%BeginPreview
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:118"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_60
+#AT_START_61
+at_fn_group_banner 61 'bitmaps.at:123' \
+  "eps with tiff preview" "                          " 12
+at_xfail=no
+(
+  $as_echo "61. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "bitmaps.at:125" >"$at_check_line_file"
+(! $GSEXE --version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:125"
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:126: fig2dev -L eps -T \$srcdir/data/line.fig line-tiff.eps
+"
+at_fn_check_prepare_notrace 'an embedded newline' "bitmaps.at:126"
+( $at_check_trace; fig2dev -L eps -T $srcdir/data/line.fig line-tiff.eps
+
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+echo stdout:; cat "$at_stdout"
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:126"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_61
+#AT_START_62
+at_fn_group_banner 62 'bitmaps.at:132' \
+  "epsi" "                                           " 13
+at_xfail=no
+(
+  $as_echo "62. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "bitmaps.at:134" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmhist -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:134"
+fig2dev -L eps -T $srcdir/data/line.fig line-epsi.eps
+blackpixels=`$SED '11 s/line/line-epsi/' $srcdir/data/boxwimg.fig | \
+	fig2dev -L ppm | ppmhist -noheader | $SED -n '2p' | tr -d ' 	'`
+# $blackpixels are 220 on archlinux with ghostscript 9.20,
+#		219 on ubuntu 16.04.2 with ghostscript 9.18
+#		263 on archlinux with ghostscript 9.22
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:141: test \$blackpixels -gt 218 && test \$blackpixels -lt 264"
+at_fn_check_prepare_dynamic "test $blackpixels -gt 218 && test $blackpixels -lt 264" "bitmaps.at:141"
+( $at_check_trace; test $blackpixels -gt 218 && test $blackpixels -lt 264
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:141"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_62
+#AT_START_63
+at_fn_group_banner 63 'bitmaps.at:144' \
+  "postscript, created by fig2dev" "                 " 13
+at_xfail=no
+(
+  $as_echo "63. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "bitmaps.at:146" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmhist -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:146"
+cat >fig2dev.ps <<'_ATEOF'
+%!PS-Adobe-3.0
+%%Orientation: Portrait
+%%Pages: 1
+%%BoundingBox: 0 0 420 595
+%%DocumentPaperSizes: A5
+%%EndComments
+%%BeginSetup
+[{
+%%BeginFeature: *PageRegion A5
+<</PageSize [420 595]>> setpagedevice
+%%EndFeature
+} stopped cleartomark
+%%EndSetup
+%%BeginProlog
+/m {moveto} bind def
+/s {show} bind def
+%%EndProlog
+%%Page: 1 1
+%%BeginPageSetup
+%%EndPageSetup
+/Helvetica findfont 12 scalefont setfont
+24 559 m (Upper left) s
+336 559 m (Upper right) s
+24 24 m (Lower left) s
+336 24 m (Lower right) s
+170 340 m (Postscript Test) s
+showpage
+%%Trailer
+%EOF
+_ATEOF
+
+
+blackpixels=`fig2dev -L ppm <<EOF | ppmhist -noheader | $SED -n '2p' | \
+	tr -d '	 '
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 5 0 1 0 -1 50 -1 -1 0.000 0 0 -1 0 0 5
+	0 fig2dev.ps
+	 0 0 7000 0 7000 9917 0 9917 0 0
+4 0 0 50 -1 16 12 4.7124 4 210 2100 7225 1575 Included postscript file\001
+EOF`
+# $blackpixels are 1236 on archlinux wiht ghostscript 9.20,
+#		1198 on ubuntu 16.04.2 with ghostscript 9.18
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:188: test \$blackpixels -gt 1197 && test \$blackpixels -lt 1240"
+at_fn_check_prepare_dynamic "test $blackpixels -gt 1197 && test $blackpixels -lt 1240" "bitmaps.at:188"
+( $at_check_trace; test $blackpixels -gt 1197 && test $blackpixels -lt 1240
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:188"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_63
+#AT_START_64
+at_fn_group_banner 64 'bitmaps.at:191' \
+  "postscript, created by latex" "                   " 13
+at_xfail=no
+(
+  $as_echo "64. $at_setup_line: testing $at_desc ..."
+  $at_traceon
+
+
+$as_echo "bitmaps.at:193" >"$at_check_line_file"
+(! $GSEXE --version || ! ppmhist -version) \
+  && at_fn_check_skip 77 "$at_srcdir/bitmaps.at:193"
+cat >latex.ps <<'_ATEOF'
+%!PS-Adobe-2.0
+%%Pages: 1
+%%PageOrder: Ascend
+%%BoundingBox: 0 0 420 596
+%%DocumentFonts: Helvetica
+%%DocumentPaperSizes: a5
+%%EndComments
+%%BeginProlog
+/m {moveto} bind def
+/s {show} bind def
+%%EndProlog
+%%BeginSetup
+%%Feature: *Resolution 600dpi
+%%BeginPaperSize: a5
+/setpagedevice where
+{ pop << /PageSize [420 595] >> setpagedevice }
+{ /a5 where { pop a5 } if }
+ifelse
+%%EndPaperSize
+%%EndSetup
+%%Page: 1 1
+/Helvetica findfont 12 scalefont setfont
+24 559 m (Upper left) s
+336 559 m (Upper right) s
+24 24 m (Lower left) s
+336 24 m (Lower right) s
+126 340 m (Postscript as created by LaTeX) s
+%%Trailer
+userdict /end-hook known{end-hook}if
+%%EOF
+_ATEOF
+
+
+blackpixels=`fig2dev -L ppm <<EOF | ppmhist -noheader | $SED -n '2p' | \
+tr -d '\t '
+#FIG 3.2
+Landscape
+Center
+Inches
+Letter
+100.00
+Single
+-2
+1200 2
+2 5 0 1 0 -1 50 -1 -1 0.000 0 0 -1 0 0 5
+	0 latex.ps
+	 0 0 7000 0 7000 9917 0 9917 0 0
+4 0 0 50 -1 16 12 4.7124 4 210 2100 7225 1575 Included postscript file\001
+EOF`
+# $blackpixels are 1488 on archlinux with ghostscript 9.20,
+#		1433 on ubuntu 16.04.2 with ghostscript 9.18
+{ set +x
+$as_echo "$at_srcdir/bitmaps.at:236: test \$blackpixels -gt 1431 && test \$blackpixels -lt 1494"
+at_fn_check_prepare_dynamic "test $blackpixels -gt 1431 && test $blackpixels -lt 1494" "bitmaps.at:236"
+( $at_check_trace; test $blackpixels -gt 1431 && test $blackpixels -lt 1494
+) >>"$at_stdout" 2>>"$at_stderr" 5>&-
+at_status=$? at_failed=false
+$at_check_filter
+at_fn_diff_devnull "$at_stderr" || at_failed=:
+at_fn_diff_devnull "$at_stdout" || at_failed=:
+at_fn_check_status 0 $at_status "$at_srcdir/bitmaps.at:236"
+$at_failed && at_fn_log_failure
+$at_traceon; }
+
+  set +x
+  $at_times_p && times >"$at_times_file"
+) 5>&1 2>&1 7>&- | eval $at_tee_pipe
+read at_status <"$at_status_file"
+#AT_STOP_64
