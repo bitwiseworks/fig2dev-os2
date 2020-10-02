@@ -33,7 +33,11 @@
 #define round(x)	((int) ((x) + ((x >= 0)? 0.5: -0.5)))
 
 /* location for temporary files */
+#ifdef __OS2__
+#define TMPDIR "/@unixroot/var/tmp"
+#else
 #define TMPDIR "/tmp"
+#endif
 
 #define	NUM_STD_COLS	32
 #define	MAX_USR_COLS	512
