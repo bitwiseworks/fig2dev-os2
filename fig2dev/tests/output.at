@@ -38,7 +38,7 @@ fig2dev -L eps $srcdir/data/arrows.fig | \
 
 # Was pamsumm -sum -brief, to expect 0\n on stdout - but pamsumm does not
 # exist on Debian stretch, so use ppmhist -noheader
-AT_CHECK([pnmarith -difference a.pgm b.pgm | ppmhist -noheader | tr -d ' \t'],
+AT_CHECK([echo `pnmarith -difference a.pgm b.pgm | ppmhist -noheader | tr -d ' \t'`],
 0, [000026673361
 ], ignore, [pnmarith -difference a.pgm b.pgm >diff.pgm
 mv a.pgm orig.pgm; mv b.pgm current.pgm])
