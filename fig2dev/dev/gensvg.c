@@ -242,6 +242,9 @@
 #include <string.h>
 #include <strings.h>
 #include <math.h>
+#ifdef __OS2__
+#include <time.h>
+#endif
 //#include <ctype.h>
 #include "bool.h"
 #include "pi.h"
