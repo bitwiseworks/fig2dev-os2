@@ -22,6 +22,7 @@ $(srcdir)/package.m4: $(top_srcdir)/configure.ac
 
 # was:	$(SHELL) '$(TESTSUITE)' RGB_FILE='$(pkgdatadir)/rbg.txt' ...
 check-local: atconfig $(TESTSUITE) atlocal
+	PATH_SEPARATOR="@PATH_SEPARATOR@" \
 	$(SHELL) '$(TESTSUITE)' INSTALLCHECK=no $(TESTSUITEFLAGS)
 
 installcheck-local: atconfig $(TESTSUITE) atlocal
